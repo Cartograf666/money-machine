@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -390,17 +390,17 @@
 
 <!-- SETUP -->
 <div class="screen" id="setup">
-  <div class="setup-title">Стань следующим OpenAI</div>
-  <div class="setup-sub">Гонка за AGI началась. Все жгут миллиарды на GPU — теперь и ты. Выбери, на чём поднимешься.</div>
+  <div class="setup-title">Become the next OpenAI</div>
+  <div class="setup-sub">The AGI race is on. Everyone's torching billions on GPUs — now it's your turn. Pick your angle.</div>
   <div class="setup-sub" id="multBadge" style="display:none; color: var(--green); font-weight: 600"></div>
   <div class="products" id="products"></div>
   <div class="name-row">
-    <input id="nameInput" placeholder="Название компании" maxlength="30" autocomplete="off">
-    <button class="dice" id="dice" title="Сгенерировать">🎲</button>
+    <input id="nameInput" placeholder="Company name" maxlength="36" autocomplete="off">
+    <button class="dice" id="dice" title="Generate">🎲</button>
   </div>
-  <button class="launch" id="launch" disabled>Запустить 🚀</button>
+  <button class="launch" id="launch" disabled>Launch 🚀</button>
   <div class="lb" id="lb">
-    <div class="lb-title">🏆 Зал славы — быстрейшие IPO</div>
+    <div class="lb-title">🏆 Hall of Fame — fastest IPOs</div>
     <div id="lbRows"></div>
   </div>
 </div>
@@ -409,19 +409,19 @@
 <div class="screen hidden" id="dash">
   <div class="brand"><span class="live"></span><span class="b-em" id="bEm"></span><span id="bName"></span></div>
   <div class="balance-wrap" id="balWrap">
-    <div class="balance-label">Баланс</div>
+    <div class="balance-label">Balance</div>
     <div id="balance">$0</div>
     <div class="ipo-prog"><div id="ipoBar"></div></div>
     <div class="ipo-label" id="ipoLabel"></div>
   </div>
   <div class="statcards">
     <div class="sc">
-      <div class="sc-label">Вы</div>
-      <div class="sc-main" id="rpm">$0/мин</div>
-      <div class="sc-sub"><b id="sales">0</b> продаж</div>
+      <div class="sc-label">You</div>
+      <div class="sc-main" id="rpm">$0/min</div>
+      <div class="sc-sub"><b id="sales">0</b> sales</div>
     </div>
     <div class="sc">
-      <div class="sc-label">🤖 Конкурент · <span id="rivalState"></span></div>
+      <div class="sc-label">🤖 Rival · <span id="rivalState"></span></div>
       <div class="sc-main" id="rivalBal2">$0</div>
       <div class="sc-sub" id="rivalName2"></div>
     </div>
@@ -429,26 +429,26 @@
   <div class="streams" id="streams"></div>
   <div id="event" class="idle">
     <span class="e-chip"><span class="e-em">📡</span></span>
-    <span class="e-txt">Рынок спокоен. Ждём следующий поворот…</span>
+    <span class="e-txt">Market's quiet. Waiting for the next plot twist…</span>
     <span class="e-mult"></span>
     <div class="e-bar"></div>
   </div>
   <div class="feed" id="feed"></div>
   <div class="upgrades">
     <button class="upg" id="upgSpeed">
-      <div class="u-top"><span class="u-name">🎛 GPU</span><span class="u-lvl">×1</span></div>
+      <div class="u-top"><span class="u-name">🎛 GPUs</span><span class="u-lvl">×1</span></div>
       <div class="u-cost"></div>
-      <div class="u-eff">+22% клиентов</div>
+      <div class="u-eff">+22% users</div>
     </button>
     <button class="upg" id="upgPrice">
-      <div class="u-top"><span class="u-name">🧠 Релиз</span><span class="u-lvl">v1</span></div>
+      <div class="u-top"><span class="u-name">🧠 Release</span><span class="u-lvl">v1</span></div>
       <div class="u-cost"></div>
-      <div class="u-eff">+55% к чеку</div>
+      <div class="u-eff">+55% per check</div>
     </button>
     <button class="upg" id="upgHype">
       <div class="u-top"><span class="u-name">🎤 DevDay</span><span class="u-lvl">⚡</span></div>
       <div class="u-cost"></div>
-      <div class="u-eff">×4 хайп · 12 c</div>
+      <div class="u-eff">×4 hype · 12s</div>
     </button>
   </div>
 </div>
@@ -458,23 +458,23 @@
     <div class="big">🔔</div>
     <h2 id="ipoTitle"></h2>
     <p id="ipoStats"></p>
-    <img id="memePrev" alt="Мем для шеринга">
+    <img id="memePrev" alt="Shareable meme">
     <div class="share-row" id="shareRow"></div>
     <button class="launch" id="ipoBtn" style="margin-top: 14px"></button>
   </div>
 </div>
 
 <div id="toast"></div>
-<button class="mute" id="sfxBtn" title="Звуки" style="display:none; right: 16px">🔊</button>
-<button class="mute" id="musicBtn" title="Музыка" style="display:none; right: 62px">🎵</button>
-<button class="mute" id="resetBtn" title="Удалить прогресс" style="display:none; right: auto; left: 16px; font-size: 15px">🗑</button>
+<button class="mute" id="sfxBtn" title="Sound effects" style="display:none; right: 16px">🔊</button>
+<button class="mute" id="musicBtn" title="Music" style="display:none; right: 62px">🎵</button>
+<button class="mute" id="resetBtn" title="Delete progress" style="display:none; right: auto; left: 16px; font-size: 15px">🗑</button>
 
 <div class="footer">
   <a href="https://chereshna.net" target="_blank" rel="noopener">chereshna.net</a>
   <span class="dot">·</span>
   <a href="https://t.me/designer_yaroslavl" target="_blank" rel="noopener" class="tg">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.04 16.62l-.39 5.45c.56 0 .8-.24 1.1-.53l2.62-2.5 5.44 3.98c1 .55 1.72.26 1.98-.92L23.9 4.6c.32-1.46-.53-2.03-1.5-1.68L1.32 11.4c-1.44.56-1.42 1.36-.25 1.72l5.4 1.68L18.9 6.97c.59-.39 1.13-.17.69.22L9.04 16.62z"/></svg>
-    Telegram-channel
+    Telegram channel
   </a>
 </div>
 
@@ -716,71 +716,79 @@ musicBtn.onclick = () => {
 
 <script>
 // ---------- data ----------
-// специализация лаборатории — вкус, экономика общая
+// lab specialization — flavor, shared economy
 const PRODUCTS = [
-  { em: "💬", name: "Чат-ассистент", desc: "миллиарды диалогов" },
-  { em: "🧑‍💻", name: "Кодинг-модель", desc: "пишет код за всех" },
-  { em: "🎬", name: "Видео-генерация", desc: "Голливуд в промпте" },
-  { em: "🧬", name: "Биотех-модель", desc: "лекарства за часы" },
-  { em: "🛡", name: "Оборонный AI", desc: "не спрашивай зачем" },
-  { em: "🤖", name: "AGI-лаборатория", desc: "осталось чуть-чуть" },
+  { em: "💬", name: "Chat Assistant", desc: "billions of yaps" },
+  { em: "🧑‍💻", name: "Coding Model", desc: "fires the whole eng team" },
+  { em: "🎬", name: "Video Gen", desc: "Hollywood in a prompt" },
+  { em: "🧬", name: "Biotech Model", desc: "cures cancer by Tuesday" },
+  { em: "🛡", name: "Defense AI", desc: "don't ask what for" },
+  { em: "🧠", name: "AGI Lab", desc: "literally 2 weeks away" },
+  { em: "🪆", name: "Open-weights Cult", desc: "free, somehow profitable" },
+  { em: "🔮", name: "Superintelligence", desc: "trust us, it's aligned" },
 ];
 
-// потоки дохода — показываются столбцами. API самый «текучий».
+// revenue streams shown as columns. API is the most "liquid".
 const STREAMS = [
-  // g — насколько быстро растёт чек с релизом модели (API растёт быстрее всех)
-  { id: "plus", name: "Plus", em: "👤", price: 20,   w: 110, g: 1.0, col: "#a1a1aa", unit: "Подписка Plus" },
-  { id: "pro",  name: "Pro",  em: "⭐", price: 200,  w: 55,  g: 1.0, col: "#059669", unit: "Подписка Pro" },
-  { id: "ent",  name: "Enterprise", em: "🏢", price: 2900, w: 9, g: 1.1, col: "#f59e0b", unit: "Enterprise-контракт" },
-  { id: "api",  name: "API",  em: "🔌", price: 140,  w: 120, g: 1.7, col: "#6366f1", unit: "API-токены" },
-  { id: "vc",   name: "Инвесторы", em: "💰", price: 60000, w: 1.6, g: 1.0, col: "#8b5cf6", unit: "Раунд инвестиций" },
+  // g — how fast the check grows per model release (API scales fastest)
+  { id: "plus", name: "Plus", em: "👤", price: 20,   w: 110, g: 1.0, col: "#a1a1aa", unit: "Plus subscription" },
+  { id: "pro",  name: "Pro",  em: "⭐", price: 200,  w: 55,  g: 1.0, col: "#059669", unit: "Pro subscription" },
+  { id: "ent",  name: "Enterprise", em: "🏢", price: 2900, w: 9, g: 1.1, col: "#f59e0b", unit: "Enterprise contract" },
+  { id: "api",  name: "API",  em: "🔌", price: 140,  w: 120, g: 1.7, col: "#6366f1", unit: "API tokens" },
+  { id: "vc",   name: "Investors", em: "💰", price: 60000, w: 1.6, g: 1.0, col: "#8b5cf6", unit: "Funding round" },
 ];
-const streamMult = { plus: 1, pro: 1, ent: 1, api: 1, vc: 1 }; // активные эффекты событий
-const VCS = ["a16z", "Sequoia", "Y Combinator", "SoftBank", "Тиньков Capital", "Дядя Сэм Ventures", "Сбер-Инвест", "Госфонд РФ", "Шейх из Дубая", "Маск лично"];
+const streamMult = { plus: 1, pro: 1, ent: 1, api: 1, vc: 1 }; // active event effects
+const VCS = ["a16z", "Sequoia", "Y Combinator", "SoftBank", "Tiger Global", "Thiel's wallet", "a guy on X", "Sovereign Fund of Dubai", "Masa Son (vibes)", "Elon personally", "Sam's other fund", "WeWork survivors", "crypto bros pivoting"];
 function pickStream() {
   const tot = STREAMS.reduce((a, s) => a + s.w * streamMult[s.id], 0);
   let r = Math.random() * tot;
   for (const s of STREAMS) { if ((r -= s.w * streamMult[s.id]) < 0) return s; }
   return STREAMS[0];
 }
-const BASE_INTERVAL = 1500; // мс между продажами на старте
-const MODEL_CODE = ["Борщ", "Спутник", "Матрёшка", "Тайга", "Квас", "Балалайка", "Гусь", "Чебурашка", "Валенок", "Самовар"];
+const BASE_INTERVAL = 1500; // ms between sales at start
+const MODEL_CODE = ["Strawberry", "Orion", "Goliath", "Behemoth", "Whisper-9000", "Oppenheimer", "Prometheus", "Skynet-mini", "Clippy-XL", "HAL-3000", "Basilisk", "Shoggoth"];
 // генератор нарочито специализированных AI-названий
-const KILLERS = ["ChatGPT", "Claude", "Gemini", "Midjourney", "Copilot", "DeepSeek", "Grok"];
-const PROF = ["стоматологов","риелторов","нотариусов","сантехников","тамады","ЖКХ","шиномонтажа","таксистов","свах","батюшек","военкомата","ломбардов","грузчиков","репетиторов","ритуальных услуг","шаурмичных"];
-const NEURO = ["нотариус","сваха","батюшка","завхоз","риелтор","участковый","тамада","бухгалтер","прораб","логопед","сторож"];
-const MASH_A = ["Шиномонт","Бухгалтер","Ломбард","Сантехник","Риелтор","Прораб","Шаурм","Военком","Сторож"];
-const MASH_B = ["AI", "GPT", ".ai", "-LLM", "Net"];
+const KILLERS = ["ChatGPT", "Claude", "Gemini", "Midjourney", "Copilot", "DeepSeek", "Grok", "Llama", "Mistral", "Sora"];
+const PROF = ["dentists", "plumbers", "realtors", "divorce lawyers", "dog walkers", "funeral homes", "exorcists", "HOA boards", "DMV clerks", "wedding DJs", "crypto orphans", "landlords", "TSA agents", "MLM moms", "tarot readers", "parking cops", "timeshare sharks", "yacht brokers"];
+const NEURO = ["Notary", "Matchmaker", "Priest", "Plumber", "Therapist", "Realtor", "Babysitter", "Accountant", "Bouncer", "Sommelier", "Life Coach", "Exorcist"];
+const MASH_A = ["Synergy", "Hustle", "Disrupt", "Pivot", "Scale", "Vibe", "Grind", "Moat", "Yeet", "Doom", "Hype", "Cope"];
+const MASH_B = ["AI", "GPT", ".ai", "LLM", "Labs", "ly", "OS", "X", "DAO", "Cloud"];
+const ADJ = ["Sentient", "Autonomous", "Agentic", "Vertical", "Frontier", "Unhinged", "Recursive", "Quantum", "Sovereign", "Based"];
+const NOUN = ["Synergy", "Paradigm", "Pipeline", "Singularity", "Moat", "Flywheel", "Wrapper", "Overlord", "Toaster", "Cult"];
 const NAME_GENS = [
-  () => "Убийца " + KILLERS[rnd(KILLERS.length)] + " для " + PROF[rnd(PROF.length)],
-  () => KILLERS[rnd(KILLERS.length)] + " для " + PROF[rnd(PROF.length)],
-  () => "Нейро" + NEURO[rnd(NEURO.length)] + " Pro",
+  () => KILLERS[rnd(KILLERS.length)] + " killer for " + PROF[rnd(PROF.length)],
+  () => "Uber but " + KILLERS[rnd(KILLERS.length)] + " for " + PROF[rnd(PROF.length)],
+  () => "AI " + NEURO[rnd(NEURO.length)] + " (YC W26)",
   () => MASH_A[rnd(MASH_A.length)] + MASH_B[rnd(MASH_B.length)],
+  () => ADJ[rnd(ADJ.length)] + " " + NOUN[rnd(NOUN.length)],
+  () => "the " + KILLERS[rnd(KILLERS.length)] + " wrapper",
 ];
-const FIRST = ["Виталя","Михалыч","Люся","Снежана","Толик","Зина","Васян","Колян","Светка","Петрович","Ашот","Гарик","Тамара","Эдик","Глаша","Нурлан","Олег 2.0","Дед Максим","Тётя Роза","Криптовалерий","Илон из Бутово","Богдан-инвестор","Жора","Зульфия","Степаныч","Лариса Иванна"];
-const CITIES = ["Москва","Дубай","Урюпинск","Бобруйск","Челябинск","Нью-Йорк","Мытищи","Токио","Бутово","Сыктывкар","Лондон","Бали","Воркута","Сингапур","Кукуево"];
+const FIRST = ["Chad", "Brad", "a 14yo coder", "Karen", "Greg from sales", "DegenDave", "Becky", "a crypto bro", "ur boss", "GPT itself", "a Roomba", "Linkedin Lunatic", "ThielStan", "a sentient toaster", "Doomer Dan", "VC Vinny", "ex-FAANG Kyle", "a guy in a Discord", "Prompt Pirate", "Stealth Steve", "Burnout Brenda", "Hype Harold", "a16z intern", "ur ex", "a bot farm", "Crypto Carl"];
+const CITIES = ["SF", "Austin", "a WeWork", "his mom's garage", "the metaverse", "Dubai", "Tallinn", "Singapore", "a Discord server", "Bangalore", "Miami", "Berlin", "Hacker House", "Burning Man", "a16z lobby", "Twitter DMs"];
 const AV_COLORS = ["#5856d6","#ff9500","#ff2d55","#0071e3","#34c759","#af52de","var(--red)","#00c7be"];
 const MILESTONES = [1000, 10000, 100000, 1000000, 10000000];
 
-// AI-события: бьют по конкретному потоку (s). mult>1 разгоняет, <1 душит.
+// AI events hit a specific stream (s). mult>1 pumps, <1 chokes.
 const EVENTS = [
-  { em: "🏆", s: "api", txt: "Ваша модель №1 на LMArena — разработчики ринулись в API", mult: 3 },
-  { em: "🔌", s: "api", txt: "Сняли rate-limit — разработчики жгут токены", mult: 2.5 },
-  { em: "📰", s: "plus", txt: "Хабр написал о вас — толпа оформляет Plus", mult: 2.5 },
-  { em: "🎙", s: "plus", txt: "Подкастер назвал вас «новым OpenAI» — наплыв новичков", mult: 3 },
-  { em: "📈", s: "pro", txt: "Бенчмарк побит — про-юзеры массово апаются на Pro", mult: 2.5 },
-  { em: "🤝", s: "ent", txt: "Сбер подписал пилот — Enterprise потянулись следом", mult: 3 },
-  { em: "🏛", s: "ent", txt: "Госконтракт на внедрение — крупный бизнес поверил", mult: 2.5 },
-  { em: "📉", s: "api", txt: "OpenAI выкатил то же самое бесплатно — отток из API", mult: 0.4 },
-  { em: "🧊", s: "api", txt: "Дата-центр ушёл в throttling из-за жары", mult: 0.45 },
-  { em: "👻", s: "pro", txt: "Модель галлюцинирует в проде — Pro отписываются", mult: 0.45 },
-  { em: "🐛", s: "pro", txt: "Нашли jailbreak — экстренный откат, Pro в гневе", mult: 0.5 },
-  { em: "🇪🇺", s: "ent", txt: "EU AI Act: регулятор тормозит Enterprise-сделки", mult: 0.45 },
-  { em: "💸", s: "plus", txt: "Подняли цену подписки — часть Plus ушла", mult: 0.5 },
-  { em: "😴", s: "plus", txt: "Конкурент демпингует — Plus перетекает к нему", mult: 0.5 },
-  { em: "🦄", s: "vc", txt: "Слух о вашем AGI — фонды дерутся за раунд", mult: 4 },
-  { em: "📑", s: "vc", txt: "Утекли годовые метрики — инвесторы в восторге", mult: 3 },
-  { em: "🫧", s: "vc", txt: "Аналитики кричат «пузырь ИИ» — фонды притихли", mult: 0.4 },
+  { em: "🏆", s: "api", txt: "You're #1 on LMArena — devs swarm your API", mult: 3 },
+  { em: "🔌", s: "api", txt: "Rate limits lifted — devs burn tokens like crazy", mult: 2.5 },
+  { em: "📰", s: "plus", txt: "TechCrunch wrote about you — normies sign up", mult: 2.5 },
+  { em: "🎙", s: "plus", txt: "Lex Fridman calls you 'the next OpenAI'", mult: 3 },
+  { em: "📈", s: "pro", txt: "Benchmark smashed — power users upgrade to Pro", mult: 2.5 },
+  { em: "🤝", s: "ent", txt: "Microsoft signs a pilot — enterprises pile in", mult: 3 },
+  { em: "🏛", s: "ent", txt: "Landed a gov contract — big biz finally trusts you", mult: 2.5 },
+  { em: "🦄", s: "vc", txt: "AGI rumor leaks — VCs fight over your round", mult: 4 },
+  { em: "📑", s: "vc", txt: "Your metrics leak — investors are frothing", mult: 3 },
+  { em: "📉", s: "api", txt: "OpenAI ships it for free — API users flee", mult: 0.4 },
+  { em: "🧊", s: "api", txt: "Datacenter throttles in a heatwave", mult: 0.45 },
+  { em: "👻", s: "pro", txt: "Model hallucinates in prod — Pro users rage-quit", mult: 0.45 },
+  { em: "🐛", s: "pro", txt: "Jailbreak found — emergency rollback, Pro furious", mult: 0.5 },
+  { em: "🇪🇺", s: "ent", txt: "EU AI Act stalls your enterprise deals", mult: 0.45 },
+  { em: "💸", s: "plus", txt: "You raised prices — half of Plus churns", mult: 0.5 },
+  { em: "😴", s: "plus", txt: "Competitor undercuts you — Plus leaks away", mult: 0.5 },
+  { em: "🫧", s: "vc", txt: "Analysts scream 'AI bubble' — funds go quiet", mult: 0.4 },
+  { em: "🔥", s: "api", txt: "Viral demo on X — API traffic 10x overnight", mult: 3 },
+  { em: "⚖️", s: "ent", txt: "NYT sues you for training data — legal freezes deals", mult: 0.45 },
 ];
 
 // ---------- state ----------
@@ -796,7 +804,7 @@ let milestoneIdx = 0;
 let lastEvent = -1;
 let ipoMult = 1, ipoTarget = 0, ipoShown = false, startTime = 0;
 let rivalName = "", rivalBal = 0, lastTick = 0;
-const CORP = ["Пентагон","Минцифры","NASA","Сбер","Saudi Fund","Евросоюз","ООН","Лукойл","Хогвартс","Ватикан"];
+const CORP = ["The Pentagon", "NASA", "Saudi Fund", "The EU", "The UN", "ExxonMobil", "Hogwarts", "The Vatican", "Walmart", "North Korea", "FIFA", "a shadow government"];
 
 // ---------- setup screen ----------
 const productsEl = document.getElementById("products");
@@ -819,7 +827,7 @@ nameInput.addEventListener("input", checkReady);
 let lastName = "";
 function genName() {
   let n;
-  do { n = NAME_GENS[rnd(NAME_GENS.length)](); } while (n === lastName || n.length > 30);
+  do { n = NAME_GENS[rnd(NAME_GENS.length)](); } while (n === lastName || n.length > 36);
   lastName = n;
   return n;
 }
@@ -893,11 +901,12 @@ function currentInterval() {
 
 // ---------- events ----------
 const IDLE_TXT = [
-  "Рынок спокоен. Ждём следующий поворот…",
-  "Инвесторы что-то затевают…",
-  "GPU гудят, токены капают…",
-  "Все ждут твой следующий релиз…",
-  "Тишина перед хайпом…"
+  "Market's quiet. Waiting for the next plot twist…",
+  "Investors are scheming something…",
+  "GPUs humming, tokens dripping…",
+  "Everyone's waiting for your next release…",
+  "Calm before the hype…",
+  "Twitter is suspiciously silent…"
 ];
 function setEventIdle() {
   const el = document.getElementById("event");
@@ -975,7 +984,7 @@ function sale() {
     confetti();
     shakeScreen();
     jackpotBoostUntil = Date.now() + 8000;
-    showToast("💰 " + corp + ": " + stream.name + "-контракт ×50!");
+    showToast("💰 " + corp + ": " + stream.name + " contract ×50!");
   } else {
     sndCoin(amt);
   }
@@ -996,7 +1005,7 @@ function addPayment(amt, corp, stream) {
     <div class="avatar" style="background:${corp ? "#f59e0b" : (stream.id === "vc" ? "#8b5cf6" : AV_COLORS[rnd(AV_COLORS.length)])}">${corp ? "🏛" : (stream.id === "vc" ? "💰" : name[0])}</div>
     <div class="info">
       <div class="who">${name}${noCity ? "" : " · " + city}</div>
-      <div class="what">${stream.em} ${corp ? stream.name + "-контракт ×50" : stream.unit} — ${company}</div>
+      <div class="what">${stream.em} ${corp ? stream.name + " contract ×50" : stream.unit} — ${company}</div>
     </div>
     <div class="amt">+${fmt(amt)}</div>`;
   feed.prepend(el);
@@ -1045,7 +1054,7 @@ function tick(ts) {
   const cutoff = Date.now() - 60000;
   history = history.filter(h => h[0] > cutoff);
   const rpm = history.reduce((s, h) => s + h[1], 0);
-  document.getElementById("rpm").textContent = fmt(rpm) + "/мин";
+  document.getElementById("rpm").textContent = fmt(rpm) + "/min";
 
   // $/мин по потокам + высота столбцов относительно максимума
   const per = {}; let maxV = 1;
@@ -1055,7 +1064,7 @@ function tick(ts) {
   STREAMS.forEach(s => {
     const r = document.getElementById("srpm-" + s.id);
     const b = document.getElementById("sbar-" + s.id);
-    if (r) r.textContent = fmt(per[s.id]) + "/м";
+    if (r) r.textContent = fmt(per[s.id]) + "/m";
     if (b) b.style.transform = "scaleX(" + (per[s.id] / maxV).toFixed(3) + ")";
   });
 
@@ -1066,10 +1075,10 @@ function tick(ts) {
   document.getElementById("rivalBal2").textContent = fmt(rivalBal);
   document.getElementById("rivalName2").textContent = rivalName;
   document.getElementById("rivalState").innerHTML =
-    balance >= rivalBal ? '<span class="ahead">вы впереди</span>' : '<span class="behind">вы позади</span>';
+    balance >= rivalBal ? '<span class="ahead">you lead</span>' : '<span class="behind">behind</span>';
 
   document.getElementById("ipoBar").style.width = Math.min(100, balance / ipoTarget * 100) + "%";
-  document.getElementById("ipoLabel").textContent = "🔔 IPO при " + fmt(ipoTarget);
+  document.getElementById("ipoLabel").textContent = "🔔 IPO at " + fmt(ipoTarget);
 
   // раз в секунду освежаем кнопки (кулдаун DevDay, доступность апгрейдов)
   if (!tick._s || ts - tick._s > 950) { tick._s = ts; updateUpgrades(); }
@@ -1081,11 +1090,11 @@ function checkIPO() {
   if (ipoShown || balance < ipoTarget) return;
   ipoShown = true;
   const mins = Math.max(1, Math.round((Date.now() - startTime) / 60000));
-  document.getElementById("ipoTitle").textContent = company + " выходит на IPO!";
+  document.getElementById("ipoTitle").textContent = company + " goes public!";
   document.getElementById("ipoStats").innerHTML =
-    `${fmt(balance)} за ${mins} мин · ${sales.toLocaleString("en-US")} продаж<br>` +
-    (balance >= rivalBal ? `Конкурент «${rivalName}» разорён 🪦` : `Конкурент «${rivalName}» ещё барахтается`);
-  document.getElementById("ipoBtn").textContent = "Продать компанию и начать ×" + (ipoMult * 2);
+    `${fmt(balance)} in ${mins} min · ${sales.toLocaleString("en-US")} sales<br>` +
+    (balance >= rivalBal ? `Rival «${rivalName}» is bankrupt 🪦` : `Rival «${rivalName}» still flailing`);
+  document.getElementById("ipoBtn").textContent = "Sell company & restart ×" + (ipoMult * 2);
   renderShareUI();
   saveLeaderboard(mins);
   document.getElementById("ipo").classList.add("show");
@@ -1106,7 +1115,7 @@ function renderLeaderboard() {
   document.getElementById("lb").style.display = "block";
   document.getElementById("lbRows").innerHTML = lb.slice(0, 5).map((r, i) =>
     `<div class="lb-row"><span>${["🥇","🥈","🥉","4.","5."][i]}</span><span class="l-em">${r.em}</span>` +
-    `<span class="l-name">${r.c}</span><span class="l-time">${r.mins} мин</span></div>`
+    `<span class="l-name">${r.c}</span><span class="l-time">${r.mins} min</span></div>`
   ).join("");
 }
 renderLeaderboard();
@@ -1150,7 +1159,7 @@ function buildMemeCanvas() {
 
   x.font = "500 44px " + FONT;
   x.fillStyle = "#a1a1aa";
-  x.fillText("вышла на IPO", S/2, 510);
+  x.fillText("went public", S/2, 510);
 
   // сумма
   x.font = "800 150px " + FONT;
@@ -1161,12 +1170,12 @@ function buildMemeCanvas() {
   const mins = Math.max(1, Math.round((Date.now() - startTime) / 60000));
   x.font = "500 42px " + FONT;
   x.fillStyle = "#d4d4d8";
-  x.fillText(`за ${mins} мин · ${sales.toLocaleString("en-US")} продаж`, S/2, 770);
+  x.fillText(`in ${mins} min · ${sales.toLocaleString("en-US")} sales`, S/2, 770);
 
-  // конкурент
+  // rival
   x.font = "500 38px " + FONT;
   x.fillStyle = "#71717a";
-  const rivalTxt = balance >= rivalBal ? `конкурент «${rivalName}» разорён 🪦` : `конкурент «${rivalName}» где-то позади`;
+  const rivalTxt = balance >= rivalBal ? `rival «${rivalName}» went bankrupt 🪦` : `rival «${rivalName}» left in the dust`;
   x.fillText(rivalTxt, S/2, 840);
 
   // низ
@@ -1192,7 +1201,7 @@ function renderShareUI() {
 
   const appUrl = location.protocol === "file:" ? "https://chereshna.net" : location.origin + location.pathname;
   const mins = Math.max(1, Math.round((Date.now() - startTime) / 60000));
-  const text = `Моя «${company}» вышла на IPO: ${fmt(balance)} за ${mins} мин 💸 Сможешь быстрее?`;
+  const text = `My «${company}» just IPO'd: ${fmt(balance)} in ${mins} min 💸 Can you go faster?`;
   const enc = encodeURIComponent;
 
   const row = document.getElementById("shareRow");
@@ -1200,7 +1209,7 @@ function renderShareUI() {
     <a class="share-btn" href="https://t.me/share/url?url=${enc(appUrl)}&text=${enc(text)}" target="_blank" rel="noopener">${ICONS.tg} Telegram</a>
     <a class="share-btn" href="https://x.com/intent/post?text=${enc(text)}&url=${enc(appUrl)}" target="_blank" rel="noopener">${ICONS.x}</a>
     <a class="share-btn" href="https://wa.me/?text=${enc(text + " " + appUrl)}" target="_blank" rel="noopener">${ICONS.wa}</a>
-    <button class="share-btn" id="dlMeme" title="Скачать картинку">${ICONS.dl}</button>`;
+    <button class="share-btn" id="dlMeme" title="Download image">${ICONS.dl}</button>`;
 
   document.getElementById("dlMeme").onclick = async () => {
     if (!memeBlob) return;
@@ -1226,7 +1235,7 @@ function saveState() {
   }));
 }
 resetBtn.onclick = () => {
-  if (confirm(`Удалить «${company}» с балансом ${fmt(balance)}? Это безвозвратно.`)) {
+  if (confirm(`Delete «${company}» with ${fmt(balance)} balance? No undo.`)) {
     localStorage.removeItem("mm");
     location.reload();
   }
@@ -1255,14 +1264,14 @@ function buy(kind) {
     modelCode = MODEL_CODE[Math.min(priceLvl - 1, MODEL_CODE.length - 1)];
     updateBrand();
     flash(upgPrice); sndUpgrade();
-    showToast("🧠 Релиз модели «" + modelCode + " v" + priceLvl + "» — чеки выросли!");
+    showToast("🧠 Released «" + modelCode + " v" + priceLvl + "» — checks went up!");
   } else if (kind === "hype" && Date.now() >= hypeReadyAt) {
     hypeMult = 4;
     hypeUntil = Date.now() + 12000;
     hypeReadyAt = Date.now() + 60000;
     flash(upgHype); sndEventGood(); confetti();
     const tok = ++bannerToken;
-    paintEvent("🎤", "DevDay! Анонс гремит — весь поток разгоняется", "ВСЁ ×4", true, 12000);
+    paintEvent("🎤", "DevDay! The keynote drops — everything pumps", "ALL ×4", true, 12000);
     if (actx && masterFilter) tempoMult = 1.1;
     setTimeout(() => {
       if (tok === bannerToken) { tempoMult = 1; setEventIdle(); }
@@ -1289,7 +1298,7 @@ function updateUpgrades() {
   upgPrice.classList.toggle("ready", balance >= priceCost);
 
   const cd = Math.max(0, Math.ceil((hypeReadyAt - Date.now()) / 1000));
-  upgHype.querySelector(".u-cost").textContent = cd > 0 ? "⏳ " + cd + " c" : "Бесплатно";
+  upgHype.querySelector(".u-cost").textContent = cd > 0 ? "⏳ " + cd + "s" : "Free";
   upgHype.classList.toggle("cooldown", cd > 0);
   upgHype.classList.toggle("ready", cd === 0);
 }
@@ -1298,7 +1307,7 @@ function updateUpgrades() {
 function checkMilestone() {
   if (milestoneIdx < MILESTONES.length && balance >= MILESTONES[milestoneIdx]) {
     const m = MILESTONES[milestoneIdx++];
-    showToast(`🎉 ${company} заработала ${fmt(m)}!`);
+    showToast(`🎉 ${company} just hit ${fmt(m)}!`);
     confetti();
     sndMilestone();
   }
@@ -1345,11 +1354,11 @@ if (sv) {
     // аудио по политике браузера стартует после первого клика
     document.addEventListener("pointerdown", () => { initAudio(); startMusic(); }, { once: true });
     startRun();
-    setTimeout(() => showToast("🔊 Нажми в любом месте — включится звук"), 800);
+    setTimeout(() => showToast("🔊 Tap anywhere to turn on sound"), 800);
   } else if (ipoMult > 1) {
     const b = document.getElementById("multBadge");
     b.style.display = "block";
-    b.textContent = "🏆 Множитель империи: ×" + ipoMult;
+    b.textContent = "🏆 Empire multiplier: ×" + ipoMult;
   }
 }
 

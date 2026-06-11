@@ -1,7 +1,7 @@
 {
   "name": "Money Machine",
   "short_name": "MoneyMachine",
-  "description": "Дофаминовый симулятор AI-империи",
+  "description": "A dopamine AI-empire idle clicker",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#fafafa",
