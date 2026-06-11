@@ -153,8 +153,11 @@
 
   /* потоки дохода — плоские плитки, не кнопки */
   .streams {
-    display: flex; gap: 8px; width: 100%; max-width: 420px; margin-top: 8px;
+    display: none; /* TODO временно скрыто — вернуть на flex */
+    gap: 8px; width: 100%; max-width: 420px; margin-top: 8px;
   }
+  /* TODO временно скрыта подпись в ленте — сюда пойдёт срок подписки / токены / раунд */
+  .pay .what { display: none; }
   .scol {
     flex: 1; background: #f4f4f5; border: none; border-radius: 12px;
     padding: 13px 6px 16px; text-align: center; position: relative; overflow: hidden;
