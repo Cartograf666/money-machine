@@ -1319,7 +1319,7 @@ function renderShareUI() {
 
   const row = document.getElementById("shareRow");
   row.innerHTML = `
-    <a class="share-btn" href="https://t.me/share/url?url=${enc(appUrl)}&text=${enc(text)}" target="_blank" rel="noopener">${ICONS.tg} Telegram</a>
+    <a class="share-btn" href="https://t.me/share/url?url=${enc(appUrl)}&text=${enc(text)}" target="_blank" rel="noopener">${ICONS.tg}</a>
     <a class="share-btn" href="https://x.com/intent/post?text=${enc(text)}&url=${enc(appUrl)}" target="_blank" rel="noopener">${ICONS.x}</a>
     <a class="share-btn" href="https://wa.me/?text=${enc(text + " " + appUrl)}" target="_blank" rel="noopener">${ICONS.wa}</a>
     <button class="share-btn" id="dlMeme" title="${tr("Download image", "Скачать картинку")}">${ICONS.dl}</button>`;
