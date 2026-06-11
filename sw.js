@@ -1,4 +1,4 @@
-const CACHE = "mm-v1";
+const CACHE = "mm-v2";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -13,9 +13,22 @@ self.addEventListener("activate", e => {
   self.clients.claim();
 });
 
-// cache-first: апка работает офлайн
+// HTML — network-first (свежая версия при деплое), остальное — cache-first (офлайн)
 self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request))
-  );
+  const isHTML = e.request.mode === "navigate" || e.request.url.endsWith("index.html");
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request).then(hit => hit || fetch(e.request))
+    );
+  }
 });
