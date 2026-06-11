@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Money Machine</title>
+<meta name="theme-color" content="#fafafa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* shadcn/ui tokens (zinc) */
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #09090b;
+    --text2: #71717a;
+    --green: #059669;
+    --blue: #18181b;
+    --red: #ef4444;
+    --border: #e4e4e7;
+    --ring: #18181b;
+    --shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px;
+    transition: opacity .5s ease, transform .5s cubic-bezier(.32,.72,0,1);
+  }
+  .screen.hidden { opacity: 0; transform: scale(.96); pointer-events: none; }
+
+  /* ============ SETUP ============ */
+  #setup { max-width: 520px; margin: 0 auto; }
+  .setup-title { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; text-align: center; }
+  .setup-sub { font-size: 17px; color: var(--text2); margin-top: 8px; text-align: center; }
+  .products {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 36px; width: 100%;
+  }
+  .product {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 8px 14px; text-align: center; cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform .25s cubic-bezier(.32,.72,0,1), border-color .2s, box-shadow .2s;
+  }
+  .product:hover { transform: translateY(-3px); border-color: #d4d4d8; }
+  .product:active { transform: scale(.95); }
+  .product.sel { border-color: var(--ring); box-shadow: 0 0 0 1px var(--ring); }
+  .product .em { font-size: 34px; }
+  .product .nm { font-size: 13px; font-weight: 600; margin-top: 8px; }
+  .product .pr { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .name-row { display: flex; gap: 10px; margin-top: 28px; width: 100%; }
+  .name-row input {
+    flex: 1; font-size: 15px; font-weight: 500; padding: 13px 16px;
+    border: 1px solid var(--border); border-radius: 8px; background: var(--card);
+    box-shadow: var(--shadow); outline: none; font-family: inherit; color: var(--text);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .name-row input:focus { border-color: var(--ring); box-shadow: 0 0 0 1px var(--ring); }
+  .name-row input::placeholder { color: var(--text2); }
+  .dice {
+    width: 50px; border: 1px solid var(--border); border-radius: 8px; background: var(--card);
+    box-shadow: var(--shadow); font-size: 20px; cursor: pointer;
+    transition: transform .25s, background .15s;
+  }
+  .dice:hover { background: #f4f4f5; }
+  .dice:active { transform: rotate(180deg) scale(.9); }
+  .launch {
+    margin-top: 28px; width: 100%; padding: 15px; border: none; border-radius: 8px;
+    background: var(--blue); color: #fafafa; font-size: 15px; font-weight: 600;
+    font-family: inherit; cursor: pointer; letter-spacing: -0.01em;
+    box-shadow: var(--shadow);
+    transition: transform .2s, opacity .2s, background .2s;
+  }
+  .launch:hover { background: #27272a; }
+  .launch:active { transform: scale(.97); }
+  .launch:disabled { opacity: .4; pointer-events: none; }
+
+  /* ============ DASHBOARD ============ */
+  #dash { justify-content: flex-start; padding-top: max(28px, env(safe-area-inset-top)); }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; color: var(--text2); }
+  .mute {
+    position: fixed; top: max(16px, env(safe-area-inset-top)); z-index: 11;
+    width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); box-shadow: var(--shadow); font-size: 17px;
+    cursor: pointer; transition: transform .2s;
+  }
+  .mute:active { transform: scale(.9); }
+  .brand .b-em { font-size: 20px; }
+  .brand .live {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+  .balance-wrap { margin-top: 7vh; text-align: center; position: relative; }
+  .balance-label { font-size: 14px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: .08em; }
+  #balance {
+    font-size: clamp(52px, 11vw, 88px); font-weight: 700; letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums; margin-top: 6px;
+    transition: transform .15s ease;
+  }
+  #balance.bump { transform: scale(1.025); }
+  .stats { display: flex; gap: 28px; justify-content: center; margin-top: 14px; }
+  .stat { font-size: 14px; color: var(--text2); font-variant-numeric: tabular-nums; }
+  .stat b { color: var(--text); font-weight: 600; }
+
+  /* floating +$ */
+  .float-money {
+    position: absolute; left: 50%; top: -6px;
+    font-size: 22px; font-weight: 700; color: var(--green);
+    pointer-events: none; white-space: nowrap;
+    animation: floatUp 1.4s cubic-bezier(.2,.6,.3,1) forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translate(-50%, 10px) scale(.7); }
+    15% { opacity: 1; transform: translate(-50%, -8px) scale(1.05); }
+    100% { opacity: 0; transform: translate(-50%, -70px) scale(1); }
+  }
+
+  /* feed */
+  .feed {
+    flex: 1; width: 100%; max-width: 420px; margin-top: 5vh;
+    overflow: hidden; position: relative;
+    -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent);
+    mask-image: linear-gradient(to bottom, black 75%, transparent);
+  }
+  .pay {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+    box-shadow: var(--shadow); margin-bottom: 8px;
+    animation: slideIn .55s cubic-bezier(.32,.72,0,1);
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-22px) scale(.96); }
+    to { opacity: 1; transform: none; }
+  }
+  .pay .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+  .pay .info { flex: 1; min-width: 0; }
+  .pay .who { font-size: 14px; font-weight: 600; }
+  .pay .what { font-size: 12px; color: var(--text2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pay .amt { font-size: 16px; font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; }
+
+  /* upgrades */
+  .upgrades {
+    display: flex; gap: 12px; width: 100%; max-width: 420px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+  .upg {
+    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; text-align: left; cursor: pointer;
+    box-shadow: var(--shadow); font-family: inherit;
+    transition: transform .2s cubic-bezier(.32,.72,0,1), opacity .2s, background .15s;
+  }
+  .upg:hover:not(:disabled) { background: #f4f4f5; }
+  .upg:active { transform: scale(.95); }
+  .upg:disabled { opacity: .45; pointer-events: none; }
+  .upg .u-top { display: flex; justify-content: space-between; align-items: center; }
+  .upg .u-name { font-size: 14px; font-weight: 600; }
+  .upg .u-lvl { font-size: 11px; font-weight: 600; color: var(--text); background: #f4f4f5; border: 1px solid var(--border); padding: 2px 8px; border-radius: 9999px; }
+  .upg .u-cost { font-size: 13px; color: var(--text2); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .upg .u-eff { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 2px; }
+  .upg.flash { animation: flash .4s; }
+  @keyframes flash { 50% { box-shadow: 0 0 0 3px rgba(52,199,89,.4); } }
+
+  /* event banner */
+  #event {
+    display: none; align-items: center; gap: 10px;
+    width: 100%; max-width: 420px; margin-top: 18px;
+    padding: 12px 16px; border-radius: 10px;
+    background: var(--card); box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    animation: slideIn .55s cubic-bezier(.32,.72,0,1);
+    position: relative; overflow: hidden;
+  }
+  #event.bad { border-left-color: var(--red); }
+  #event .e-em { font-size: 24px; }
+  #event .e-txt { flex: 1; font-size: 13px; font-weight: 600; line-height: 1.35; }
+  #event .e-mult { font-size: 15px; font-weight: 700; color: var(--green); white-space: nowrap; }
+  #event.bad .e-mult { color: var(--red); }
+  #event .e-bar {
+    position: absolute; left: 0; bottom: 0; height: 3px;
+    background: var(--green); width: 100%;
+    transform-origin: left;
+  }
+  #event.bad .e-bar { background: var(--red); }
+
+  /* джекпот */
+  .pay.jp { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 0 0 1px rgba(245,158,11,.25); }
+  .pay.jp .amt { color: #d97706; }
+  .pay.jp .what { color: #b45309; }
+
+  /* конкурент */
+  .rival { margin-top: 12px; font-size: 13px; color: var(--text2); font-variant-numeric: tabular-nums; }
+  .rival b { color: var(--text); font-weight: 600; }
+  .rival .ahead { color: var(--green); font-weight: 600; }
+  .rival .behind { color: var(--red); font-weight: 600; }
+
+  /* прогресс до IPO */
+  .ipo-prog {
+    width: 220px; height: 6px; border-radius: 9999px; background: #e4e4e7;
+    margin: 14px auto 0; overflow: hidden;
+  }
+  .ipo-prog > div { height: 100%; width: 0%; background: var(--text); border-radius: 9999px; transition: width .6s ease; }
+  .ipo-label { font-size: 12px; color: var(--text2); margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+  /* IPO overlay */
+  #ipo {
+    position: fixed; inset: 0; z-index: 20; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(250,250,250,.92); backdrop-filter: blur(8px);
+  }
+  #ipo.show { display: flex; }
+  .ipo-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.15); padding: 36px 32px; max-width: 380px;
+    width: calc(100% - 48px); text-align: center;
+    animation: slideIn .6s cubic-bezier(.32,.72,0,1);
+  }
+  .ipo-card .big { font-size: 56px; }
+  .ipo-card h2 { font-size: 22px; font-weight: 700; margin-top: 10px; letter-spacing: -0.02em; }
+  .ipo-card p { font-size: 14px; color: var(--text2); margin-top: 10px; line-height: 1.5; }
+  .ipo-card .launch { margin-top: 24px; }
+
+  /* футер */
+  .footer {
+    position: fixed; bottom: 8px; left: 0; right: 0; text-align: center;
+    font-size: 11px; color: var(--text2); z-index: 5; pointer-events: none;
+  }
+  .footer a { color: var(--text2); pointer-events: auto; }
+  #dash .upgrades { padding-bottom: max(34px, env(safe-area-inset-bottom)); }
+
+  /* milestone toast */
+  #toast {
+    position: fixed; top: 18px; left: 50%; transform: translate(-50%, -150%);
+    background: var(--card); color: var(--text); font-size: 14px; font-weight: 600;
+    padding: 12px 20px; border-radius: 10px; z-index: 10;
+    border: 1px solid var(--border);
+    transition: transform .55s cubic-bezier(.32,.72,0,1);
+    box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  }
+  #toast.show { transform: translate(-50%, 0); }
+
+  /* confetti */
+  .confetti {
+    position: fixed; width: 8px; height: 8px; top: -10px; z-index: 9;
+    pointer-events: none; border-radius: 2px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: .6; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div class="screen" id="setup">
+  <div class="setup-title">Запусти свой продукт</div>
+  <div class="setup-sub">Выбери, на чём будешь богатеть</div>
+  <div class="setup-sub" id="multBadge" style="display:none; color: var(--green); font-weight: 600"></div>
+  <div class="products" id="products"></div>
+  <div class="name-row">
+    <input id="nameInput" placeholder="Название компании" maxlength="30" autocomplete="off">
+    <button class="dice" id="dice" title="Сгенерировать">🎲</button>
+  </div>
+  <button class="launch" id="launch" disabled>Запустить 🚀</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen hidden" id="dash">
+  <div class="brand"><span class="live"></span><span class="b-em" id="bEm"></span><span id="bName"></span></div>
+  <div class="balance-wrap" id="balWrap">
+    <div class="balance-label">Баланс</div>
+    <div id="balance">$0</div>
+    <div class="stats">
+      <div class="stat"><b id="sales">0</b> продаж</div>
+      <div class="stat"><b id="rpm">$0</b>/мин</div>
+    </div>
+    <div class="ipo-prog"><div id="ipoBar"></div></div>
+    <div class="ipo-label" id="ipoLabel"></div>
+    <div class="rival" id="rival"></div>
+  </div>
+  <div id="event">
+    <span class="e-em"></span>
+    <span class="e-txt"></span>
+    <span class="e-mult"></span>
+    <div class="e-bar"></div>
+  </div>
+  <div class="feed" id="feed"></div>
+  <div class="upgrades">
+    <button class="upg" id="upgSpeed">
+      <div class="u-top"><span class="u-name">⚡ Скорость</span><span class="u-lvl">LVL 1</span></div>
+      <div class="u-cost"></div>
+      <div class="u-eff">+25% к потоку клиентов</div>
+    </button>
+    <button class="upg" id="upgPrice">
+      <div class="u-top"><span class="u-name">💎 Чек</span><span class="u-lvl">LVL 1</span></div>
+      <div class="u-cost"></div>
+      <div class="u-eff">+60% к среднему чеку</div>
+    </button>
+  </div>
+</div>
+
+<div id="ipo">
+  <div class="ipo-card">
+    <div class="big">🔔</div>
+    <h2 id="ipoTitle"></h2>
+    <p id="ipoStats"></p>
+    <button class="launch" id="shareBtn" style="background: var(--green)">Поделиться мемом 📤</button>
+    <button class="launch" id="ipoBtn" style="margin-top: 10px"></button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<button class="mute" id="sfxBtn" title="Звуки" style="display:none; right: 16px">🔊</button>
+<button class="mute" id="musicBtn" title="Музыка" style="display:none; right: 62px">🎵</button>
+<button class="mute" id="resetBtn" title="Сбросить прогресс" style="display:none; right: 108px">↺</button>
+
+<div class="footer">сделано на <a href="https://chereshna.net" target="_blank" rel="noopener">chereshna.net</a></div>
+
+<script>
+// ---------- sound (Web Audio) ----------
+let actx = null, sfxMuted = false, musicMuted = false;
+function initAudio() {
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === "suspended") actx.resume();
+  if (!noiseBuf) {
+    noiseBuf = actx.createBuffer(1, actx.sampleRate * 0.1, actx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+}
+function tone(freq, start, dur, vol, type = "sine") {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = freq;
+  const t = actx.currentTime + start;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+// техно-«кэтчинг»: саб-удар + лазерный pitch-up + искра
+// жирность масштабируется от суммы чека: $100 → лёгкий тик, $100k → удар в грудь
+function sndCoin(amt) {
+  if (sfxMuted || !actx) return;
+  const t0 = actx.currentTime;
+  // вес чека: 0 при ~$100, 1 при ~$100k (лог-шкала)
+  const w = Math.min(1, Math.max(0, (Math.log10(amt || 100) - 2) / 3));
+  const v = (1 - w * 0.25) * (1 + (Math.random() - 0.5) * 0.12); // крупный чек = ниже питч
+
+  // 1) саб-удар: чем жирнее чек, тем глубже и дольше
+  const sub = actx.createOscillator(), sg = actx.createGain();
+  sub.type = "sine";
+  sub.frequency.setValueAtTime(95 - w * 25, t0);
+  sub.frequency.exponentialRampToValueAtTime(45 - w * 10, t0 + 0.09 + w * 0.06);
+  sg.gain.setValueAtTime(0.16 + w * 0.3, t0);
+  sg.gain.exponentialRampToValueAtTime(0.001, t0 + 0.14 + w * 0.2);
+  sub.connect(sg); sg.connect(actx.destination);
+  sub.start(t0); sub.stop(t0 + 0.4);
+
+  // 2) лазерный zap вверх
+  const z = actx.createOscillator(), zf = actx.createBiquadFilter(), zg = actx.createGain();
+  z.type = "square";
+  z.frequency.setValueAtTime(420 * v, t0);
+  z.frequency.exponentialRampToValueAtTime(1900 * v, t0 + 0.09 + w * 0.04);
+  zf.type = "lowpass"; zf.frequency.value = 3200;
+  zg.gain.setValueAtTime(0.08 + w * 0.08, t0);
+  zg.gain.exponentialRampToValueAtTime(0.001, t0 + 0.13 + w * 0.05);
+  z.connect(zf); zf.connect(zg); zg.connect(actx.destination);
+  z.start(t0); z.stop(t0 + 0.25);
+
+  // 3) искры сверху: у крупного чека — целый каскад
+  tone(1760 * v, 0.06, 0.12, 0.05 + w * 0.04);
+  tone(2637 * v, 0.1, 0.16, 0.04 + w * 0.04);
+  if (w > 0.5) tone(3520 * v, 0.15, 0.2, 0.05);
+  if (w > 0.75) { tone(2093 * v, 0.2, 0.25, 0.06); tone(4186 * v, 0.26, 0.3, 0.04); }
+}
+// апгрейд: мягкий «щёлк» + подъём
+function sndUpgrade() {
+  if (sfxMuted || !actx) return;
+  tone(220, 0, 0.1, 0.1, "triangle");
+  tone(440, 0.06, 0.12, 0.08, "triangle");
+  tone(660, 0.13, 0.22, 0.07, "triangle");
+}
+// майлстоун: арпеджио
+function sndMilestone() {
+  if (sfxMuted || !actx) return;
+  [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, i * 0.09, 0.35, 0.08));
+}
+// событие: хорошее — фанфара вверх, плохое — грустный тромбон вниз
+function sndEventGood() {
+  if (sfxMuted || !actx) return;
+  [392, 523, 659].forEach((f, i) => tone(f, i * 0.1, 0.3, 0.09, "triangle"));
+}
+function sndEventBad() {
+  if (sfxMuted || !actx) return;
+  [330, 294, 247].forEach((f, i) => tone(f, i * 0.16, 0.4, 0.09, "sawtooth"));
+}
+// джекпот: шумовой райзер → жирный удар → каскад
+function sndJackpot() {
+  if (sfxMuted || !actx) return;
+  const t0 = actx.currentTime;
+  const src = actx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  const f = actx.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 1.5;
+  f.frequency.setValueAtTime(400, t0);
+  f.frequency.exponentialRampToValueAtTime(5000, t0 + 0.7);
+  const g = actx.createGain();
+  g.gain.setValueAtTime(0.02, t0);
+  g.gain.linearRampToValueAtTime(0.16, t0 + 0.7);
+  g.gain.setValueAtTime(0.0001, t0 + 0.72);
+  src.connect(f); f.connect(g); g.connect(actx.destination);
+  src.start(t0); src.stop(t0 + 0.75);
+
+  const sub = actx.createOscillator(), sg = actx.createGain();
+  sub.type = "sine";
+  sub.frequency.setValueAtTime(80, t0 + 0.72);
+  sub.frequency.exponentialRampToValueAtTime(35, t0 + 1.0);
+  sg.gain.setValueAtTime(0.5, t0 + 0.72);
+  sg.gain.exponentialRampToValueAtTime(0.001, t0 + 1.3);
+  sub.connect(sg); sg.connect(actx.destination);
+  sub.start(t0 + 0.72); sub.stop(t0 + 1.35);
+
+  [1046, 1318, 1568, 2093, 2637].forEach((fr, i) => tone(fr, 0.75 + i * 0.07, 0.3, 0.08));
+}
+// ---------- техно-луп (126 BPM, kick / hat / bass / stab) ----------
+let musicGain = null, masterFilter = null, noiseBuf = null, beatStep = 0, nextNoteTime = 0;
+let tempoMult = 1, jackpotBoostUntil = 0;
+const BPM = 126, STEP16 = 60 / BPM / 4;
+const BASS_PAT = [0,0,1,0, 0,0,1,1, 0,0,1,0, 0,1,0,1, 0,0,1,0, 0,0,1,1, 0,0,1,0, 1,1,0,1];
+const BASS_NOTES = [55, 55, 65.4, 49]; // A1 A1 C2 G1 — по тактам
+
+function startMusic() {
+  if (musicGain || !actx) return;
+  musicGain = actx.createGain();
+  musicGain.gain.value = musicMuted ? 0 : 0.5;
+  masterFilter = actx.createBiquadFilter();
+  masterFilter.type = "lowpass";
+  masterFilter.frequency.value = 18000;
+  musicGain.connect(masterFilter);
+  masterFilter.connect(actx.destination);
+  nextNoteTime = actx.currentTime + 0.1;
+  setInterval(scheduleMusic, 25);
+}
+function scheduleMusic() {
+  while (nextNoteTime < actx.currentTime + 0.12) {
+    playStep(beatStep, nextNoteTime);
+    beatStep = (beatStep + 1) % 32;
+    nextNoteTime += STEP16 / tempoMult;
+  }
+}
+// музыка живая: чем больше продаж в минуту, тем больше слоёв
+function playStep(s, t) {
+  const rate = history.length; // продаж за последнюю минуту
+  const boosted = Date.now() < jackpotBoostUntil;
+  if (s % 4 === 0) kick(t);
+  if (s % 2 === 0) hat(t, s % 4 === 2 ? 0.055 : 0.025);
+  if (rate >= 12 && s % 2 === 1) hat(t, 0.018);                      // слой 2: шестнадцатые хэты
+  if ((rate >= 25 || boosted) && s % 8 === 4) clap(t, boosted ? 0.15 : 0.1); // слой 3: клэп
+  if (BASS_PAT[s]) bass(t, BASS_NOTES[Math.floor(s / 8)]);
+  if (rate >= 40 && BASS_PAT[s] && s % 2 === 0) bass(t, BASS_NOTES[Math.floor(s / 8)] * 2, 0.07); // слой 4: октава баса
+  if (s === 28) stab(t);
+}
+function clap(t, vol) {
+  const src = actx.createBufferSource(); src.buffer = noiseBuf;
+  const f = actx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1800; f.Q.value = 1.2;
+  const g = actx.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  src.connect(f); f.connect(g); g.connect(musicGain);
+  src.start(t); src.stop(t + 0.13);
+}
+function kick(t) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(150, t);
+  o.frequency.exponentialRampToValueAtTime(45, t + 0.1);
+  g.gain.setValueAtTime(0.5, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+  o.connect(g); g.connect(musicGain);
+  o.start(t); o.stop(t + 0.35);
+}
+function hat(t, vol) {
+  const src = actx.createBufferSource(); src.buffer = noiseBuf;
+  const f = actx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 8500;
+  const g = actx.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+  src.connect(f); f.connect(g); g.connect(musicGain);
+  src.start(t); src.stop(t + 0.06);
+}
+function bass(t, freq, vol = 0.16) {
+  const o = actx.createOscillator(), f = actx.createBiquadFilter(), g = actx.createGain();
+  o.type = "sawtooth"; o.frequency.value = freq;
+  f.type = "lowpass"; f.frequency.value = 420; f.Q.value = 6;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + STEP16 * 0.9);
+  o.connect(f); f.connect(g); g.connect(musicGain);
+  o.start(t); o.stop(t + STEP16);
+}
+function stab(t) {
+  [220, 261.6, 329.6].forEach(fr => {
+    const o = actx.createOscillator(), f = actx.createBiquadFilter(), g = actx.createGain();
+    o.type = "square"; o.frequency.value = fr;
+    f.type = "lowpass"; f.frequency.value = 1200;
+    g.gain.setValueAtTime(0.035, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    o.connect(f); f.connect(g); g.connect(musicGain);
+    o.start(t); o.stop(t + 0.25);
+  });
+}
+
+const sfxBtn = document.getElementById("sfxBtn");
+const musicBtn = document.getElementById("musicBtn");
+sfxBtn.onclick = () => {
+  sfxMuted = !sfxMuted;
+  sfxBtn.textContent = sfxMuted ? "🔇" : "🔊";
+  sfxBtn.style.opacity = sfxMuted ? 0.45 : 1;
+};
+musicBtn.onclick = () => {
+  musicMuted = !musicMuted;
+  musicBtn.style.opacity = musicMuted ? 0.45 : 1;
+  if (musicGain) musicGain.gain.value = musicMuted ? 0 : 0.5;
+};
+</script>
+
+<script>
+// ---------- data ----------
+const PRODUCTS = [
+  { em: "🧠", name: "Foundation-модель", price: 4900, unit: "Enterprise-лицензия" },
+  { em: "☁️", name: "GPU-облако", price: 12000, unit: "Кластер H200, месяц" },
+  { em: "🤖", name: "AI-агенты для корпораций", price: 2500, unit: "Внедрение под ключ" },
+  { em: "🛡", name: "AI-кибербезопасность", price: 8000, unit: "Годовой контракт" },
+  { em: "🚗", name: "Автономное вождение", price: 990, unit: "Подписка на автопилот" },
+  { em: "🦾", name: "Гуманоидные роботы", price: 35000, unit: "Поставка, 1 юнит" },
+];
+// генератор нарочито специализированных AI-названий
+const KILLERS = ["ChatGPT", "Claude", "Gemini", "Midjourney", "Copilot", "DeepSeek", "Grok"];
+const PROF = ["стоматологов","риелторов","нотариусов","сантехников","тамады","ЖКХ","шиномонтажа","таксистов","свах","батюшек","военкомата","ломбардов","грузчиков","репетиторов","ритуальных услуг","шаурмичных"];
+const NEURO = ["нотариус","сваха","батюшка","завхоз","риелтор","участковый","тамада","бухгалтер","прораб","логопед","сторож"];
+const MASH_A = ["Шиномонт","Бухгалтер","Ломбард","Сантехник","Риелтор","Прораб","Шаурм","Военком","Сторож"];
+const MASH_B = ["AI", "GPT", ".ai", "-LLM", "Net"];
+const NAME_GENS = [
+  () => "Убийца " + KILLERS[rnd(KILLERS.length)] + " для " + PROF[rnd(PROF.length)],
+  () => KILLERS[rnd(KILLERS.length)] + " для " + PROF[rnd(PROF.length)],
+  () => "Нейро" + NEURO[rnd(NEURO.length)] + " Pro",
+  () => MASH_A[rnd(MASH_A.length)] + MASH_B[rnd(MASH_B.length)],
+];
+const FIRST = ["Виталя","Михалыч","Люся","Снежана","Толик","Зина","Васян","Колян","Светка","Петрович","Ашот","Гарик","Тамара","Эдик","Глаша","Нурлан","Олег 2.0","Дед Максим","Тётя Роза","Криптовалерий","Илон из Бутово","Богдан-инвестор","Жора","Зульфия","Степаныч","Лариса Иванна"];
+const CITIES = ["Москва","Дубай","Урюпинск","Бобруйск","Челябинск","Нью-Йорк","Мытищи","Токио","Бутово","Сыктывкар","Лондон","Бали","Воркута","Сингапур","Кукуево"];
+const AV_COLORS = ["#5856d6","#ff9500","#ff2d55","#0071e3","#34c759","#af52de","var(--red)","#00c7be"];
+const MILESTONES = [1000, 10000, 100000, 1000000, 10000000];
+
+// AI-события: mult > 1 ускоряет поток, < 1 замедляет
+const EVENTS = [
+  { em: "🚀", txt: "GPT-8 упомянул вас в ответе пользователю", mult: 3 },
+  { em: "📰", txt: "Хабр написал статью «Они сделали это на нейросетях»", mult: 2.5 },
+  { em: "🦾", txt: "Ваш AI прошёл собеседование в Google вместо клиента", mult: 2 },
+  { em: "🎙", txt: "Подкастер с миллионом подписчиков назвал вас «новым OpenAI»", mult: 3 },
+  { em: "🤝", txt: "Сбер предложил «партнёрство» — пока просто хайп", mult: 2 },
+  { em: "🧠", txt: "Нейросеть сама себе настроила рекламу. Хорошо настроила", mult: 2.5 },
+  { em: "📉", txt: "OpenAI выкатил то же самое, но бесплатно", mult: 0.4 },
+  { em: "🔥", txt: "GPU-сервер перегрелся, инференс на калькуляторе", mult: 0.5 },
+  { em: "👻", txt: "Нейросеть начала галлюцинировать прямо в проде", mult: 0.45 },
+  { em: "💸", txt: "API подорожал в 4 раза. Опять", mult: 0.55 },
+  { em: "🇪🇺", txt: "EU AI Act: регулятор запросил «пару документов»", mult: 0.5 },
+  { em: "😴", txt: "Нейросеть ушла на дообучение без предупреждения", mult: 0.45 },
+];
+
+// ---------- state ----------
+let product = null, company = "";
+let balance = 0, shownBalance = 0, sales = 0;
+let speedLvl = 1, priceLvl = 1;
+let speedCost = 100, priceCost = 250;
+let baseInterval = 3800, priceMult = 1;
+// честный баланс: интервал растёт с чеком, базовый $/мин у всех сопоставим
+function productInterval(p) { return 1400 * Math.pow(p.price / 1000, 0.85); }
+let history = []; // [time, amount]
+let milestoneIdx = 0;
+let eventMult = 1, lastEvent = -1;
+let ipoMult = 1, ipoTarget = 0, ipoShown = false, startTime = 0;
+let rivalName = "", rivalBal = 0, lastTick = 0;
+const CORP = ["Пентагон","Минцифры","NASA","Сбер","Saudi Fund","Евросоюз","ООН","Лукойл","Хогвартс","Ватикан"];
+
+// ---------- setup screen ----------
+const productsEl = document.getElementById("products");
+PRODUCTS.forEach((p, i) => {
+  const d = document.createElement("div");
+  d.className = "product";
+  const cad = productInterval(p) / 1000;
+  const cadTxt = cad < 2 ? "часто, помалу" : "раз в ~" + Math.round(cad) + " c";
+  d.innerHTML = `<div class="em">${p.em}</div><div class="nm">${p.name}</div><div class="pr">~$${p.price.toLocaleString("en-US")} · ${cadTxt}</div>`;
+  d.onclick = () => {
+    document.querySelectorAll(".product").forEach(x => x.classList.remove("sel"));
+    d.classList.add("sel");
+    product = p;
+    checkReady();
+  };
+  productsEl.appendChild(d);
+});
+
+const nameInput = document.getElementById("nameInput");
+const launchBtn = document.getElementById("launch");
+nameInput.addEventListener("input", checkReady);
+let lastName = "";
+function genName() {
+  let n;
+  do { n = NAME_GENS[rnd(NAME_GENS.length)](); } while (n === lastName || n.length > 30);
+  lastName = n;
+  return n;
+}
+document.getElementById("dice").onclick = () => {
+  nameInput.value = genName();
+  checkReady();
+};
+function checkReady() {
+  company = nameInput.value.trim();
+  launchBtn.disabled = !(product && company.length >= 2);
+}
+
+function startRun() {
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("dash").classList.remove("hidden");
+  document.getElementById("bEm").textContent = product.em;
+  document.getElementById("bName").textContent = company + (ipoMult > 1 ? " · ×" + ipoMult : "");
+  sfxBtn.style.display = "block";
+  musicBtn.style.display = "block";
+  resetBtn.style.display = "block";
+  baseInterval = productInterval(product);
+  ipoTarget = 25000000 * ipoMult; // фиксированная цель — у всех продуктов равные шансы
+  updateUpgrades();
+  scheduleSale(1200);
+  scheduleEvent();
+  setInterval(saveState, 4000);
+  requestAnimationFrame(tick);
+}
+
+launchBtn.onclick = () => {
+  // цены апгрейдов масштабируются под чек продукта
+  speedCost = Math.round(product.price * 4);
+  priceCost = Math.round(product.price * 10);
+  startTime = Date.now();
+  rivalName = genName();
+  rivalBal = product.price * 150;
+  initAudio();
+  startMusic();
+  startRun();
+};
+
+// ---------- engine ----------
+function rnd(n) { return Math.floor(Math.random() * n); }
+function fmt(n) {
+  return "$" + Math.floor(n).toLocaleString("en-US");
+}
+
+function scheduleSale(delay) {
+  setTimeout(() => { sale(); scheduleSale(currentInterval()); }, delay);
+}
+function currentInterval() {
+  const base = baseInterval * Math.pow(0.8, speedLvl - 1) / eventMult;
+  return Math.max(120, base * (0.6 + Math.random() * 0.8));
+}
+
+// ---------- events ----------
+function scheduleEvent() {
+  setTimeout(fireEvent, 18000 + Math.random() * 25000);
+}
+function fireEvent() {
+  let i;
+  do { i = rnd(EVENTS.length); } while (i === lastEvent);
+  lastEvent = i;
+  const ev = EVENTS[i];
+  const dur = 12000 + Math.random() * 10000;
+  eventMult = ev.mult;
+  const good = ev.mult >= 1;
+
+  const el = document.getElementById("event");
+  el.className = good ? "" : "bad";
+  el.style.display = "flex";
+  el.querySelector(".e-em").textContent = ev.em;
+  el.querySelector(".e-txt").textContent = ev.txt;
+  el.querySelector(".e-mult").textContent = "×" + ev.mult + " к потоку";
+  const bar = el.querySelector(".e-bar");
+  bar.style.transition = "none";
+  bar.style.transform = "scaleX(1)";
+  void bar.offsetWidth;
+  bar.style.transition = `transform ${dur}ms linear`;
+  bar.style.transform = "scaleX(0)";
+
+  good ? sndEventGood() : sndEventBad();
+
+  // музыка реагирует: плохое событие глушит фильтром, хорошее ускоряет темп
+  if (actx && masterFilter) {
+    if (good) tempoMult = 1.06;
+    else masterFilter.frequency.setTargetAtTime(380, actx.currentTime, 0.2);
+  }
+
+  setTimeout(() => {
+    eventMult = 1;
+    tempoMult = 1;
+    if (actx && masterFilter) masterFilter.frequency.setTargetAtTime(18000, actx.currentTime, 0.3);
+    el.style.display = "none";
+    scheduleEvent();
+  }, dur);
+}
+
+function sale() {
+  let amt = product.price * priceMult * ipoMult * (0.85 + Math.random() * 0.5);
+  const corp = Math.random() < 1 / 80 ? CORP[rnd(CORP.length)] : null; // джекпот ×50
+  if (corp) amt *= 50;
+  balance += amt;
+  sales++;
+  history.push([Date.now(), amt]);
+  addPayment(amt, corp);
+  floatMoney(amt, corp);
+  if (corp) {
+    sndJackpot();
+    confetti();
+    jackpotBoostUntil = Date.now() + 8000;
+    showToast("💰 " + corp + ": корпоративный заказ ×50!");
+  } else {
+    sndCoin(amt);
+  }
+  bump();
+  checkMilestone();
+  checkIPO();
+  updateUpgrades();
+}
+
+function addPayment(amt, corp) {
+  const feed = document.getElementById("feed");
+  const name = corp || FIRST[rnd(FIRST.length)];
+  const city = CITIES[rnd(CITIES.length)];
+  const el = document.createElement("div");
+  el.className = corp ? "pay jp" : "pay";
+  el.innerHTML = `
+    <div class="avatar" style="background:${corp ? "#f59e0b" : AV_COLORS[rnd(AV_COLORS.length)]}">${corp ? "🏛" : name[0]}</div>
+    <div class="info">
+      <div class="who">${name}${corp ? "" : " · " + city}</div>
+      <div class="what">${corp ? "Корпоративный заказ ×50" : product.unit} — ${company}</div>
+    </div>
+    <div class="amt">+${fmt(amt)}</div>`;
+  feed.prepend(el);
+  while (feed.children.length > 12) feed.lastChild.remove();
+}
+
+function floatMoney(amt, corp) {
+  const w = document.getElementById("balWrap");
+  const f = document.createElement("div");
+  f.className = "float-money";
+  f.textContent = "+" + fmt(amt);
+  f.style.left = (35 + Math.random() * 30) + "%";
+  if (corp) { f.style.fontSize = "34px"; f.style.color = "#d97706"; }
+  w.appendChild(f);
+  setTimeout(() => f.remove(), 1500);
+}
+
+let bumpT = null;
+function bump() {
+  const b = document.getElementById("balance");
+  b.classList.add("bump");
+  clearTimeout(bumpT);
+  bumpT = setTimeout(() => b.classList.remove("bump"), 150);
+}
+
+// smooth counter + rpm + конкурент + прогресс IPO
+function tick(ts) {
+  shownBalance += (balance - shownBalance) * 0.12;
+  if (balance - shownBalance < 0.5) shownBalance = balance;
+  document.getElementById("balance").textContent = fmt(shownBalance);
+  document.getElementById("sales").textContent = sales.toLocaleString("en-US");
+  const cutoff = Date.now() - 60000;
+  history = history.filter(h => h[0] > cutoff);
+  const rpm = history.reduce((s, h) => s + h[1], 0);
+  document.getElementById("rpm").textContent = fmt(rpm);
+
+  // конкурент зарабатывает ~90% твоего темпа, но никогда не спит
+  const dt = lastTick ? Math.min(2, (ts - lastTick) / 1000) : 0;
+  lastTick = ts;
+  rivalBal += Math.max(rpm / 60 * 0.9, product.price * 0.12) * dt;
+  document.getElementById("rival").innerHTML =
+    `🤖 <b>${rivalName}</b>: ${fmt(rivalBal)} · ` +
+    (balance >= rivalBal ? '<span class="ahead">вы впереди</span>' : '<span class="behind">вы позади</span>');
+
+  document.getElementById("ipoBar").style.width = Math.min(100, balance / ipoTarget * 100) + "%";
+  document.getElementById("ipoLabel").textContent = "🔔 IPO при " + fmt(ipoTarget);
+  requestAnimationFrame(tick);
+}
+
+// ---------- IPO ----------
+function checkIPO() {
+  if (ipoShown || balance < ipoTarget) return;
+  ipoShown = true;
+  const mins = Math.max(1, Math.round((Date.now() - startTime) / 60000));
+  document.getElementById("ipoTitle").textContent = company + " выходит на IPO!";
+  document.getElementById("ipoStats").innerHTML =
+    `${fmt(balance)} за ${mins} мин · ${sales.toLocaleString("en-US")} продаж<br>` +
+    (balance >= rivalBal ? `Конкурент «${rivalName}» разорён 🪦` : `Конкурент «${rivalName}» ещё барахтается`);
+  document.getElementById("ipoBtn").textContent = "Продать компанию и начать ×" + (ipoMult * 2);
+  document.getElementById("ipo").classList.add("show");
+  sndMilestone();
+  confetti(); setTimeout(confetti, 600); setTimeout(confetti, 1200);
+}
+document.getElementById("ipoBtn").onclick = () => {
+  localStorage.setItem("mm", JSON.stringify({ ipoMult: ipoMult * 2 }));
+  location.reload();
+};
+
+// ---------- шеринг-мем ----------
+function buildMemeCanvas() {
+  const S = 1080;
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = S;
+  const x = cv.getContext("2d");
+  const FONT = '-apple-system, "Segoe UI", Roboto, sans-serif';
+
+  // фон: zinc-950 + лёгкое свечение
+  x.fillStyle = "#09090b";
+  x.fillRect(0, 0, S, S);
+  const grad = x.createRadialGradient(S/2, S*0.38, 80, S/2, S*0.38, S*0.7);
+  grad.addColorStop(0, "rgba(5,150,105,0.22)");
+  grad.addColorStop(1, "rgba(5,150,105,0)");
+  x.fillStyle = grad;
+  x.fillRect(0, 0, S, S);
+
+  x.textAlign = "center";
+
+  // эмодзи продукта
+  x.font = "170px " + FONT;
+  x.fillText(product.em, S/2, 300);
+
+  // название компании (ужимается под ширину)
+  let fs = 88;
+  x.font = `700 ${fs}px ${FONT}`;
+  while (x.measureText(company).width > S - 140 && fs > 40) {
+    fs -= 4;
+    x.font = `700 ${fs}px ${FONT}`;
+  }
+  x.fillStyle = "#fafafa";
+  x.fillText(company, S/2, 440);
+
+  x.font = "500 44px " + FONT;
+  x.fillStyle = "#a1a1aa";
+  x.fillText("вышла на IPO", S/2, 510);
+
+  // сумма
+  x.font = "800 150px " + FONT;
+  x.fillStyle = "#10b981";
+  x.fillText(fmt(balance), S/2, 680);
+
+  // статы
+  const mins = Math.max(1, Math.round((Date.now() - startTime) / 60000));
+  x.font = "500 42px " + FONT;
+  x.fillStyle = "#d4d4d8";
+  x.fillText(`за ${mins} мин · ${sales.toLocaleString("en-US")} продаж`, S/2, 770);
+
+  // конкурент
+  x.font = "500 38px " + FONT;
+  x.fillStyle = "#71717a";
+  const rivalTxt = balance >= rivalBal ? `конкурент «${rivalName}» разорён 🪦` : `конкурент «${rivalName}» где-то позади`;
+  x.fillText(rivalTxt, S/2, 840);
+
+  // низ
+  x.font = "600 36px " + FONT;
+  x.fillStyle = "#52525b";
+  x.fillText("💸 Money Machine · chereshna.net", S/2, 990);
+  return cv;
+}
+
+document.getElementById("shareBtn").onclick = () => {
+  buildMemeCanvas().toBlob(async blob => {
+    const file = new File([blob], "money-machine-ipo.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: "Money Machine" }); return; } catch (e) {}
+    }
+    // фолбэк: скачать
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "money-machine-ipo.png";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, "image/png");
+};
+
+// ---------- сохранение ----------
+const resetBtn = document.getElementById("resetBtn");
+function saveState() {
+  localStorage.setItem("mm", JSON.stringify({
+    run: true, pi: PRODUCTS.indexOf(product), company,
+    balance, sales, speedLvl, priceLvl, speedCost, priceCost, priceMult,
+    ipoMult, milestoneIdx, rivalName, rivalBal, startTime
+  }));
+}
+resetBtn.onclick = () => {
+  if (confirm("Сбросить весь прогресс?")) {
+    localStorage.removeItem("mm");
+    location.reload();
+  }
+};
+
+// ---------- upgrades ----------
+const upgSpeed = document.getElementById("upgSpeed");
+const upgPrice = document.getElementById("upgPrice");
+
+upgSpeed.onclick = () => buy("speed");
+upgPrice.onclick = () => buy("price");
+
+function buy(kind) {
+  if (kind === "speed" && balance >= speedCost) {
+    balance -= speedCost;
+    speedLvl++;
+    speedCost = Math.round(speedCost * 2.3);
+    flash(upgSpeed);
+    sndUpgrade();
+  } else if (kind === "price" && balance >= priceCost) {
+    balance -= priceCost;
+    priceLvl++;
+    priceMult *= 1.6;
+    priceCost = Math.round(priceCost * 2.5);
+    flash(upgPrice);
+    sndUpgrade();
+  }
+  updateUpgrades();
+}
+
+function flash(el) {
+  el.classList.remove("flash");
+  void el.offsetWidth;
+  el.classList.add("flash");
+}
+
+function updateUpgrades() {
+  upgSpeed.querySelector(".u-lvl").textContent = "LVL " + speedLvl;
+  upgSpeed.querySelector(".u-cost").textContent = "Купить за " + fmt(speedCost);
+  upgSpeed.disabled = balance < speedCost;
+  upgPrice.querySelector(".u-lvl").textContent = "LVL " + priceLvl;
+  upgPrice.querySelector(".u-cost").textContent = "Купить за " + fmt(priceCost);
+  upgPrice.disabled = balance < priceCost;
+}
+
+// ---------- milestones ----------
+function checkMilestone() {
+  if (milestoneIdx < MILESTONES.length && balance >= MILESTONES[milestoneIdx]) {
+    const m = MILESTONES[milestoneIdx++];
+    showToast(`🎉 ${company} заработала ${fmt(m)}!`);
+    confetti();
+    sndMilestone();
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+function confetti() {
+  const colors = ["#34c759","#0071e3","#ff9500","#ff2d55","#af52de","#ffcc00"];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = colors[rnd(colors.length)];
+    c.style.animationDuration = (1.6 + Math.random() * 1.6) + "s";
+    c.style.animationDelay = Math.random() * 0.6 + "s";
+    c.style.width = c.style.height = (5 + Math.random() * 6) + "px";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// ---------- восстановление сохранения ----------
+const sv = JSON.parse(localStorage.getItem("mm") || "null");
+if (sv) {
+  ipoMult = sv.ipoMult || 1;
+  if (sv.run && PRODUCTS[sv.pi]) {
+    product = PRODUCTS[sv.pi];
+    company = sv.company;
+    balance = sv.balance; sales = sv.sales;
+    speedLvl = sv.speedLvl; priceLvl = sv.priceLvl;
+    speedCost = sv.speedCost; priceCost = sv.priceCost;
+    priceMult = sv.priceMult; milestoneIdx = sv.milestoneIdx;
+    rivalName = sv.rivalName; rivalBal = sv.rivalBal;
+    startTime = sv.startTime;
+    // аудио по политике браузера стартует после первого клика
+    document.addEventListener("pointerdown", () => { initAudio(); startMusic(); }, { once: true });
+    startRun();
+  } else if (ipoMult > 1) {
+    const b = document.getElementById("multBadge");
+    b.style.display = "block";
+    b.textContent = "🏆 Множитель империи: ×" + ipoMult;
+  }
+}
+
+// ---------- PWA ----------
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
