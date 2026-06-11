@@ -163,10 +163,10 @@
 
   /* feed */
   .feed {
-    flex: 1; width: 100%; max-width: 420px; margin-top: 3vh;
-    overflow: hidden; position: relative;
-    -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent);
-    mask-image: linear-gradient(to bottom, black 75%, transparent);
+    flex: 1; width: 100%; max-width: 420px; margin-top: 16px;
+    overflow: hidden; position: relative; padding-top: 12px;
+    -webkit-mask-image: linear-gradient(to bottom, black 78%, transparent);
+    mask-image: linear-gradient(to bottom, black 78%, transparent);
   }
   .pay {
     display: flex; align-items: center; gap: 12px;
@@ -177,7 +177,7 @@
   }
   .pay.jp { animation: slideIn .55s cubic-bezier(.32,.72,0,1); }
   @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-22px) scale(.96); }
+    from { opacity: 0; transform: translateY(-10px) scale(.97); }
     to { opacity: 1; transform: none; }
   }
   @keyframes payGlow {
@@ -366,8 +366,8 @@
 
 <!-- SETUP -->
 <div class="screen" id="setup">
-  <div class="setup-title">Запусти свою AI-лабораторию</div>
-  <div class="setup-sub">Выбери специализацию своей AI-лаборатории</div>
+  <div class="setup-title">Стань следующим OpenAI</div>
+  <div class="setup-sub">Гонка за AGI началась. Все жгут миллиарды на GPU — теперь и ты. Выбери, на чём поднимешься.</div>
   <div class="setup-sub" id="multBadge" style="display:none; color: var(--green); font-weight: 600"></div>
   <div class="products" id="products"></div>
   <div class="name-row">
@@ -697,10 +697,11 @@ const PRODUCTS = [
 
 // потоки дохода — показываются столбцами. API самый «текучий».
 const STREAMS = [
-  { id: "plus", name: "Plus", em: "👤", price: 20,   w: 55,  col: "#a1a1aa", unit: "Подписка Plus" },
-  { id: "pro",  name: "Pro",  em: "⭐", price: 200,  w: 22,  col: "#059669", unit: "Подписка Pro" },
-  { id: "ent",  name: "Enterprise", em: "🏢", price: 2900, w: 5, col: "#f59e0b", unit: "Enterprise-контракт" },
-  { id: "api",  name: "API",  em: "🔌", price: 140,  w: 120, col: "#6366f1", unit: "API-токены" },
+  // g — насколько быстро растёт чек с релизом модели (API растёт быстрее всех)
+  { id: "plus", name: "Plus", em: "👤", price: 20,   w: 110, g: 1.0, col: "#a1a1aa", unit: "Подписка Plus" },
+  { id: "pro",  name: "Pro",  em: "⭐", price: 200,  w: 55,  g: 1.0, col: "#059669", unit: "Подписка Pro" },
+  { id: "ent",  name: "Enterprise", em: "🏢", price: 2900, w: 9, g: 1.1, col: "#f59e0b", unit: "Enterprise-контракт" },
+  { id: "api",  name: "API",  em: "🔌", price: 140,  w: 120, g: 1.7, col: "#6366f1", unit: "API-токены" },
 ];
 const STREAM_W = STREAMS.reduce((s, x) => s + x.w, 0);
 function pickStream() {
@@ -902,7 +903,8 @@ function fireEvent() {
 
 function sale() {
   const stream = pickStream();
-  let amt = stream.price * priceMult * ipoMult * (0.85 + Math.random() * 0.5);
+  // у API чек растёт с релизами быстрее (priceMult^g)
+  let amt = stream.price * Math.pow(priceMult, stream.g) * ipoMult * (0.85 + Math.random() * 0.5);
   // джекпот ×50 — только в платных потоках (не в Plus)
   const corp = (stream.id !== "plus" && Math.random() < 1 / 90) ? CORP[rnd(CORP.length)] : null;
   if (corp) amt *= 50;
