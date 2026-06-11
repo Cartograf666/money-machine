@@ -119,11 +119,11 @@
     color: var(--green);
     text-shadow: 0 0 28px rgba(5,150,105,.35);
   }
-  /* карточки статистики: вы / конкурент */
-  .statcards { display: flex; gap: 8px; width: 100%; max-width: 420px; margin: 16px auto 0; }
+  /* карточки статистики: вы / конкурент — плоская «дашборд-зона» */
+  .statcards { display: flex; gap: 8px; width: 100%; max-width: 420px; margin: 14px auto 0; }
   .sc {
-    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 13px 15px; box-shadow: var(--shadow); text-align: left; min-width: 0;
+    flex: 1; background: #f4f4f5; border: none; border-radius: 12px;
+    padding: 13px 15px; text-align: left; min-width: 0;
   }
   .sc-label {
     font-size: 10px; font-weight: 600; color: var(--text2); text-transform: uppercase;
@@ -151,18 +151,18 @@
     100% { opacity: 0; transform: translate(-50%, -95px) rotate(var(--rot, 0deg)) scale(.95); }
   }
 
-  /* потоки дохода — столбцы */
+  /* потоки дохода — плоские плитки, не кнопки */
   .streams {
-    display: flex; gap: 8px; width: 100%; max-width: 420px; margin-top: 3.5vh;
+    display: flex; gap: 8px; width: 100%; max-width: 420px; margin-top: 8px;
   }
   .scol {
-    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 14px 6px 17px; text-align: center; position: relative; overflow: hidden;
-    box-shadow: var(--shadow); transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+    flex: 1; background: #f4f4f5; border: none; border-radius: 12px;
+    padding: 13px 6px 16px; text-align: center; position: relative; overflow: hidden;
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1);
   }
-  .scol .s-em { font-size: 22px; line-height: 1; }
-  .scol .s-name { font-size: 11px; font-weight: 600; color: var(--text2); margin-top: 5px; letter-spacing: .02em; }
-  .scol .s-rpm { font-size: 13px; font-weight: 700; margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .scol .s-em { font-size: 20px; line-height: 1; }
+  .scol .s-name { font-size: 9.5px; font-weight: 600; color: var(--text2); margin-top: 5px; letter-spacing: .01em; line-height: 1.1; }
+  .scol .s-rpm { font-size: 12px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
   .scol .s-bar { height: 4px; }
   .scol .s-bar {
     position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
@@ -732,8 +732,10 @@ const STREAMS = [
   { id: "pro",  name: "Pro",  em: "⭐", price: 200,  w: 55,  g: 1.0, col: "#059669", unit: "Подписка Pro" },
   { id: "ent",  name: "Enterprise", em: "🏢", price: 2900, w: 9, g: 1.1, col: "#f59e0b", unit: "Enterprise-контракт" },
   { id: "api",  name: "API",  em: "🔌", price: 140,  w: 120, g: 1.7, col: "#6366f1", unit: "API-токены" },
+  { id: "vc",   name: "Инвесторы", em: "💰", price: 60000, w: 1.6, g: 1.0, col: "#8b5cf6", unit: "Раунд инвестиций" },
 ];
-const streamMult = { plus: 1, pro: 1, ent: 1, api: 1 }; // активные эффекты событий
+const streamMult = { plus: 1, pro: 1, ent: 1, api: 1, vc: 1 }; // активные эффекты событий
+const VCS = ["a16z", "Sequoia", "Y Combinator", "SoftBank", "Тиньков Capital", "Дядя Сэм Ventures", "Сбер-Инвест", "Госфонд РФ", "Шейх из Дубая", "Маск лично"];
 function pickStream() {
   const tot = STREAMS.reduce((a, s) => a + s.w * streamMult[s.id], 0);
   let r = Math.random() * tot;
@@ -775,6 +777,9 @@ const EVENTS = [
   { em: "🇪🇺", s: "ent", txt: "EU AI Act: регулятор тормозит Enterprise-сделки", mult: 0.45 },
   { em: "💸", s: "plus", txt: "Подняли цену подписки — часть Plus ушла", mult: 0.5 },
   { em: "😴", s: "plus", txt: "Конкурент демпингует — Plus перетекает к нему", mult: 0.5 },
+  { em: "🦄", s: "vc", txt: "Слух о вашем AGI — фонды дерутся за раунд", mult: 4 },
+  { em: "📑", s: "vc", txt: "Утекли годовые метрики — инвесторы в восторге", mult: 3 },
+  { em: "🫧", s: "vc", txt: "Аналитики кричат «пузырь ИИ» — фонды притихли", mult: 0.4 },
 ];
 
 // ---------- state ----------
@@ -981,14 +986,15 @@ function sale() {
 
 function addPayment(amt, corp, stream) {
   const feed = document.getElementById("feed");
-  const name = corp || FIRST[rnd(FIRST.length)];
+  const name = corp || (stream.id === "vc" ? VCS[rnd(VCS.length)] : FIRST[rnd(FIRST.length)]);
   const city = CITIES[rnd(CITIES.length)];
+  const noCity = corp || stream.id === "vc";
   const el = document.createElement("div");
   el.className = corp ? "pay jp" : "pay";
   el.innerHTML = `
-    <div class="avatar" style="background:${corp ? "#f59e0b" : AV_COLORS[rnd(AV_COLORS.length)]}">${corp ? "🏛" : name[0]}</div>
+    <div class="avatar" style="background:${corp ? "#f59e0b" : (stream.id === "vc" ? "#8b5cf6" : AV_COLORS[rnd(AV_COLORS.length)])}">${corp ? "🏛" : (stream.id === "vc" ? "💰" : name[0])}</div>
     <div class="info">
-      <div class="who">${name}${corp ? "" : " · " + city}</div>
+      <div class="who">${name}${noCity ? "" : " · " + city}</div>
       <div class="what">${stream.em} ${corp ? stream.name + "-контракт ×50" : stream.unit} — ${company}</div>
     </div>
     <div class="amt">+${fmt(amt)}</div>`;
