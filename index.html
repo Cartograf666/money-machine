@@ -122,14 +122,19 @@
   /* карточки статистики: вы / конкурент */
   .statcards { display: flex; gap: 8px; width: 100%; max-width: 420px; margin: 16px auto 0; }
   .sc {
-    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 9px 12px; box-shadow: var(--shadow); text-align: left; min-width: 0;
+    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px 15px; box-shadow: var(--shadow); text-align: left; min-width: 0;
   }
-  .sc-label { font-size: 10px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
-  .sc-main { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-sub { font-size: 12px; color: var(--text2); margin-top: 1px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-sub .ahead { color: var(--green); font-weight: 600; }
-  .sc-sub .behind { color: var(--red); font-weight: 600; }
+  .sc-label {
+    font-size: 10px; font-weight: 600; color: var(--text2); text-transform: uppercase;
+    letter-spacing: .04em; display: flex; align-items: center; gap: 5px;
+    white-space: nowrap; overflow: hidden;
+  }
+  .sc-label .ahead { color: var(--green); }
+  .sc-label .behind { color: var(--red); }
+  .sc-main { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-sub { font-size: 12px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-sub b { color: var(--text); font-weight: 600; }
 
   /* floating +$ */
   .float-money {
@@ -151,13 +156,14 @@
     display: flex; gap: 8px; width: 100%; max-width: 420px; margin-top: 3.5vh;
   }
   .scol {
-    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 9px 6px 11px; text-align: center; position: relative; overflow: hidden;
+    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 6px 17px; text-align: center; position: relative; overflow: hidden;
     box-shadow: var(--shadow); transition: transform .18s cubic-bezier(.34,1.56,.64,1);
   }
-  .scol .s-em { font-size: 17px; line-height: 1; }
-  .scol .s-name { font-size: 10px; font-weight: 600; color: var(--text2); margin-top: 3px; letter-spacing: .02em; }
-  .scol .s-rpm { font-size: 12px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .scol .s-em { font-size: 22px; line-height: 1; }
+  .scol .s-name { font-size: 11px; font-weight: 600; color: var(--text2); margin-top: 5px; letter-spacing: .02em; }
+  .scol .s-rpm { font-size: 13px; font-weight: 700; margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .scol .s-bar { height: 4px; }
   .scol .s-bar {
     position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
     transform: scaleX(0); transform-origin: left; transition: transform .5s ease;
@@ -414,9 +420,9 @@
       <div class="sc-sub"><b id="sales">0</b> продаж</div>
     </div>
     <div class="sc">
-      <div class="sc-label">🤖 Конкурент</div>
+      <div class="sc-label">🤖 Конкурент · <span id="rivalState"></span></div>
       <div class="sc-main" id="rivalBal2">$0</div>
-      <div class="sc-sub" id="rivalSub"></div>
+      <div class="sc-sub" id="rivalName2"></div>
     </div>
   </div>
   <div class="streams" id="streams"></div>
@@ -727,10 +733,11 @@ const STREAMS = [
   { id: "ent",  name: "Enterprise", em: "🏢", price: 2900, w: 9, g: 1.1, col: "#f59e0b", unit: "Enterprise-контракт" },
   { id: "api",  name: "API",  em: "🔌", price: 140,  w: 120, g: 1.7, col: "#6366f1", unit: "API-токены" },
 ];
-const STREAM_W = STREAMS.reduce((s, x) => s + x.w, 0);
+const streamMult = { plus: 1, pro: 1, ent: 1, api: 1 }; // активные эффекты событий
 function pickStream() {
-  let r = Math.random() * STREAM_W;
-  for (const s of STREAMS) { if ((r -= s.w) < 0) return s; }
+  const tot = STREAMS.reduce((a, s) => a + s.w * streamMult[s.id], 0);
+  let r = Math.random() * tot;
+  for (const s of STREAMS) { if ((r -= s.w * streamMult[s.id]) < 0) return s; }
   return STREAMS[0];
 }
 const BASE_INTERVAL = 1500; // мс между продажами на старте
@@ -752,25 +759,22 @@ const CITIES = ["Москва","Дубай","Урюпинск","Бобруйск
 const AV_COLORS = ["#5856d6","#ff9500","#ff2d55","#0071e3","#34c759","#af52de","var(--red)","#00c7be"];
 const MILESTONES = [1000, 10000, 100000, 1000000, 10000000];
 
-// AI-события: mult > 1 ускоряет поток, < 1 замедляет
+// AI-события: бьют по конкретному потоку (s). mult>1 разгоняет, <1 душит.
 const EVENTS = [
-  { em: "🚀", txt: "GPT-8 упомянул вас в ответе пользователю", mult: 3 },
-  { em: "📰", txt: "Хабр написал статью «Они сделали это на нейросетях»", mult: 2.5 },
-  { em: "🦾", txt: "Ваш AI прошёл собеседование в Google вместо клиента", mult: 2 },
-  { em: "🎙", txt: "Подкастер с миллионом подписчиков назвал вас «новым OpenAI»", mult: 3 },
-  { em: "🤝", txt: "Сбер предложил «партнёрство» — пока просто хайп", mult: 2 },
-  { em: "🧠", txt: "Нейросеть сама себе настроила рекламу. Хорошо настроила", mult: 2.5 },
-  { em: "📉", txt: "OpenAI выкатил то же самое, но бесплатно", mult: 0.4 },
-  { em: "🔥", txt: "GPU-сервер перегрелся, инференс на калькуляторе", mult: 0.5 },
-  { em: "👻", txt: "Нейросеть начала галлюцинировать прямо в проде", mult: 0.45 },
-  { em: "💸", txt: "API подорожал в 4 раза. Опять", mult: 0.55 },
-  { em: "🇪🇺", txt: "EU AI Act: регулятор запросил «пару документов»", mult: 0.5 },
-  { em: "😴", txt: "Нейросеть ушла на дообучение без предупреждения", mult: 0.45 },
-  { em: "🏆", txt: "Ваша модель №1 на LMArena — все ринулись за API", mult: 3 },
-  { em: "📈", txt: "Бенчмарк MMLU побит — Enterprise выстроились в очередь", mult: 2.5 },
-  { em: "🔌", txt: "API-лимиты сняты, разработчики жгут токены", mult: 2 },
-  { em: "🧊", txt: "Дата-центр ушёл в throttling из-за жары", mult: 0.5 },
-  { em: "🐛", txt: "В новой модели нашли jailbreak — экстренный откат", mult: 0.45 },
+  { em: "🏆", s: "api", txt: "Ваша модель №1 на LMArena — разработчики ринулись в API", mult: 3 },
+  { em: "🔌", s: "api", txt: "Сняли rate-limit — разработчики жгут токены", mult: 2.5 },
+  { em: "📰", s: "plus", txt: "Хабр написал о вас — толпа оформляет Plus", mult: 2.5 },
+  { em: "🎙", s: "plus", txt: "Подкастер назвал вас «новым OpenAI» — наплыв новичков", mult: 3 },
+  { em: "📈", s: "pro", txt: "Бенчмарк побит — про-юзеры массово апаются на Pro", mult: 2.5 },
+  { em: "🤝", s: "ent", txt: "Сбер подписал пилот — Enterprise потянулись следом", mult: 3 },
+  { em: "🏛", s: "ent", txt: "Госконтракт на внедрение — крупный бизнес поверил", mult: 2.5 },
+  { em: "📉", s: "api", txt: "OpenAI выкатил то же самое бесплатно — отток из API", mult: 0.4 },
+  { em: "🧊", s: "api", txt: "Дата-центр ушёл в throttling из-за жары", mult: 0.45 },
+  { em: "👻", s: "pro", txt: "Модель галлюцинирует в проде — Pro отписываются", mult: 0.45 },
+  { em: "🐛", s: "pro", txt: "Нашли jailbreak — экстренный откат, Pro в гневе", mult: 0.5 },
+  { em: "🇪🇺", s: "ent", txt: "EU AI Act: регулятор тормозит Enterprise-сделки", mult: 0.45 },
+  { em: "💸", s: "plus", txt: "Подняли цену подписки — часть Plus ушла", mult: 0.5 },
+  { em: "😴", s: "plus", txt: "Конкурент демпингует — Plus перетекает к нему", mult: 0.5 },
 ];
 
 // ---------- state ----------
@@ -783,7 +787,7 @@ let hypeMult = 1, hypeUntil = 0, hypeReadyAt = 0; // DevDay
 let modelCode = MODEL_CODE[0];
 let history = []; // [time, amount, streamId]
 let milestoneIdx = 0;
-let eventMult = 1, lastEvent = -1;
+let lastEvent = -1;
 let ipoMult = 1, ipoTarget = 0, ipoShown = false, startTime = 0;
 let rivalName = "", rivalBal = 0, lastTick = 0;
 const CORP = ["Пентагон","Минцифры","NASA","Сбер","Saudi Fund","Евросоюз","ООН","Лукойл","Хогвартс","Ватикан"];
@@ -877,7 +881,7 @@ function scheduleSale(delay) {
 }
 function currentInterval() {
   if (Date.now() > hypeUntil) hypeMult = 1;
-  const base = baseInterval * Math.pow(0.82, speedLvl - 1) / eventMult / hypeMult;
+  const base = baseInterval * Math.pow(0.82, speedLvl - 1) / hypeMult;
   return Math.max(60, base * (0.6 + Math.random() * 0.8));
 }
 
@@ -899,8 +903,23 @@ function setEventIdle() {
   bar.style.transition = "none";
   bar.style.transform = "scaleX(0)";
 }
+let bannerToken = 0;
 function scheduleEvent() {
-  setTimeout(fireEvent, 18000 + Math.random() * 25000);
+  setTimeout(fireEvent, 16000 + Math.random() * 22000);
+}
+// рисует баннер + анимирует таймер-полоску
+function paintEvent(emoji, txt, multTxt, good, durMs) {
+  const el = document.getElementById("event");
+  el.className = good ? "good" : "bad";
+  el.querySelector(".e-em").textContent = emoji;
+  el.querySelector(".e-txt").textContent = txt;
+  el.querySelector(".e-mult").textContent = multTxt;
+  const bar = el.querySelector(".e-bar");
+  bar.style.transition = "none";
+  bar.style.transform = "scaleX(1)";
+  void bar.offsetWidth;
+  bar.style.transition = `transform ${durMs}ms linear`;
+  bar.style.transform = "scaleX(0)";
 }
 function fireEvent() {
   let i;
@@ -908,34 +927,26 @@ function fireEvent() {
   lastEvent = i;
   const ev = EVENTS[i];
   const dur = 12000 + Math.random() * 10000;
-  eventMult = ev.mult;
   const good = ev.mult >= 1;
+  const st = STREAMS.find(s => s.id === ev.s);
+  const tok = ++bannerToken;
 
-  const el = document.getElementById("event");
-  el.className = good ? "good" : "bad";
-  el.querySelector(".e-em").textContent = ev.em;
-  el.querySelector(".e-txt").textContent = ev.txt;
-  el.querySelector(".e-mult").textContent = "×" + ev.mult;
-  const bar = el.querySelector(".e-bar");
-  bar.style.transition = "none";
-  bar.style.transform = "scaleX(1)";
-  void bar.offsetWidth;
-  bar.style.transition = `transform ${dur}ms linear`;
-  bar.style.transform = "scaleX(0)";
-
+  streamMult[ev.s] = ev.mult; // эффект только на этот поток
+  pulseStream(ev.s);
+  paintEvent(st.em, ev.txt, st.name + " ×" + ev.mult, good, dur);
   good ? sndEventGood() : sndEventBad();
-
-  // музыка реагирует: плохое событие глушит фильтром, хорошее ускоряет темп
   if (actx && masterFilter) {
     if (good) tempoMult = 1.06;
     else masterFilter.frequency.setTargetAtTime(380, actx.currentTime, 0.2);
   }
 
   setTimeout(() => {
-    eventMult = 1;
-    tempoMult = 1;
-    if (actx && masterFilter) masterFilter.frequency.setTargetAtTime(18000, actx.currentTime, 0.3);
-    setEventIdle();
+    streamMult[ev.s] = 1;
+    if (tok === bannerToken) {
+      tempoMult = 1;
+      if (actx && masterFilter) masterFilter.frequency.setTargetAtTime(18000, actx.currentTime, 0.3);
+      setEventIdle();
+    }
     scheduleEvent();
   }, dur);
 }
@@ -1046,8 +1057,9 @@ function tick(ts) {
   lastTick = ts;
   rivalBal += Math.max(rpm / 60 * 0.9, 80) * dt;
   document.getElementById("rivalBal2").textContent = fmt(rivalBal);
-  document.getElementById("rivalSub").innerHTML = rivalName + " · " +
-    (balance >= rivalBal ? '<span class="ahead">вы впереди</span>' : '<span class="behind">вы позади</span>');
+  document.getElementById("rivalName2").textContent = rivalName;
+  document.getElementById("rivalState").innerHTML =
+    balance >= rivalBal ? '<span class="ahead">вы впереди</span>' : '<span class="behind">вы позади</span>';
 
   document.getElementById("ipoBar").style.width = Math.min(100, balance / ipoTarget * 100) + "%";
   document.getElementById("ipoLabel").textContent = "🔔 IPO при " + fmt(ipoTarget);
@@ -1242,7 +1254,12 @@ function buy(kind) {
     hypeUntil = Date.now() + 12000;
     hypeReadyAt = Date.now() + 60000;
     flash(upgHype); sndEventGood(); confetti();
-    showToast("🎤 DevDay! Хайп ×4 на 12 секунд");
+    const tok = ++bannerToken;
+    paintEvent("🎤", "DevDay! Анонс гремит — весь поток разгоняется", "ВСЁ ×4", true, 12000);
+    if (actx && masterFilter) tempoMult = 1.1;
+    setTimeout(() => {
+      if (tok === bannerToken) { tempoMult = 1; setEventIdle(); }
+    }, 12000);
   }
   updateUpgrades();
 }
