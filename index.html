@@ -158,7 +158,6 @@
   .scol {
     flex: 1; background: #f4f4f5; border: none; border-radius: 12px;
     padding: 13px 6px 16px; text-align: center; position: relative; overflow: hidden;
-    transition: transform .18s cubic-bezier(.34,1.56,.64,1);
   }
   .scol .s-em { font-size: 20px; line-height: 1; }
   .scol .s-name { font-size: 9.5px; font-weight: 600; color: var(--text2); margin-top: 5px; letter-spacing: .01em; line-height: 1.1; }
@@ -168,7 +167,6 @@
     position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
     transform: scaleX(0); transform-origin: left; transition: transform .5s ease;
   }
-  .scol.hit { transform: translateY(-4px); }
   .scol.hit { animation: scolHit .5s ease-out; }
   @keyframes scolHit {
     0% { box-shadow: var(--shadow), 0 0 0 0 var(--scol, rgba(5,150,105,.5)); }
