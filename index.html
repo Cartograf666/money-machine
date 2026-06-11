@@ -138,9 +138,32 @@
     100% { opacity: 0; transform: translate(-50%, -95px) rotate(var(--rot, 0deg)) scale(.95); }
   }
 
+  /* потоки дохода — столбцы */
+  .streams {
+    display: flex; gap: 8px; width: 100%; max-width: 420px; margin-top: 3.5vh;
+  }
+  .scol {
+    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 6px 11px; text-align: center; position: relative; overflow: hidden;
+    box-shadow: var(--shadow); transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+  }
+  .scol .s-em { font-size: 17px; line-height: 1; }
+  .scol .s-name { font-size: 10px; font-weight: 600; color: var(--text2); margin-top: 3px; letter-spacing: .02em; }
+  .scol .s-rpm { font-size: 12px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .scol .s-bar {
+    position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
+    transform: scaleX(0); transform-origin: left; transition: transform .5s ease;
+  }
+  .scol.hit { transform: translateY(-4px); }
+  .scol.hit { animation: scolHit .5s ease-out; }
+  @keyframes scolHit {
+    0% { box-shadow: var(--shadow), 0 0 0 0 var(--scol, rgba(5,150,105,.5)); }
+    100% { box-shadow: var(--shadow), 0 0 0 7px rgba(5,150,105,0); }
+  }
+
   /* feed */
   .feed {
-    flex: 1; width: 100%; max-width: 420px; margin-top: 5vh;
+    flex: 1; width: 100%; max-width: 420px; margin-top: 3vh;
     overflow: hidden; position: relative;
     -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent);
     mask-image: linear-gradient(to bottom, black 75%, transparent);
@@ -184,7 +207,7 @@
   }
   .upg {
     flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 14px 16px; text-align: left; cursor: pointer;
+    padding: 12px 12px; text-align: left; cursor: pointer; min-width: 0;
     box-shadow: var(--shadow); font-family: inherit;
     transition: transform .2s cubic-bezier(.32,.72,0,1), opacity .2s, background .15s;
   }
@@ -192,7 +215,9 @@
   .upg:active { transform: scale(.95); }
   .upg:disabled { opacity: .45; pointer-events: none; }
   .upg .u-top { display: flex; justify-content: space-between; align-items: center; }
-  .upg .u-name { font-size: 14px; font-weight: 600; }
+  .upg .u-name { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .upg .u-cost { white-space: nowrap; }
+  .upg.cooldown { opacity: .5; pointer-events: none; }
   .upg .u-lvl { font-size: 11px; font-weight: 600; color: var(--text); background: #f4f4f5; border: 1px solid var(--border); padding: 2px 8px; border-radius: 9999px; }
   .upg .u-cost { font-size: 13px; color: var(--text2); margin-top: 6px; font-variant-numeric: tabular-nums; }
   .upg .u-eff { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 2px; }
@@ -341,8 +366,8 @@
 
 <!-- SETUP -->
 <div class="screen" id="setup">
-  <div class="setup-title">Запусти свой продукт</div>
-  <div class="setup-sub">Выбери, на чём будешь богатеть</div>
+  <div class="setup-title">Запусти свою AI-лабораторию</div>
+  <div class="setup-sub">Выбери специализацию своей AI-лаборатории</div>
   <div class="setup-sub" id="multBadge" style="display:none; color: var(--green); font-weight: 600"></div>
   <div class="products" id="products"></div>
   <div class="name-row">
@@ -370,6 +395,7 @@
     <div class="ipo-label" id="ipoLabel"></div>
     <div class="rival" id="rival"></div>
   </div>
+  <div class="streams" id="streams"></div>
   <div id="event">
     <span class="e-em"></span>
     <span class="e-txt"></span>
@@ -379,14 +405,19 @@
   <div class="feed" id="feed"></div>
   <div class="upgrades">
     <button class="upg" id="upgSpeed">
-      <div class="u-top"><span class="u-name">⚡ Скорость</span><span class="u-lvl">LVL 1</span></div>
+      <div class="u-top"><span class="u-name">🎛 GPU</span><span class="u-lvl">×1</span></div>
       <div class="u-cost"></div>
-      <div class="u-eff">+25% к потоку клиентов</div>
+      <div class="u-eff">+22% клиентов</div>
     </button>
     <button class="upg" id="upgPrice">
-      <div class="u-top"><span class="u-name">💎 Чек</span><span class="u-lvl">LVL 1</span></div>
+      <div class="u-top"><span class="u-name">🧠 Релиз</span><span class="u-lvl">v1</span></div>
       <div class="u-cost"></div>
-      <div class="u-eff">+60% к среднему чеку</div>
+      <div class="u-eff">+55% к чеку</div>
+    </button>
+    <button class="upg" id="upgHype">
+      <div class="u-top"><span class="u-name">🎤 DevDay</span><span class="u-lvl">⚡</span></div>
+      <div class="u-cost"></div>
+      <div class="u-eff">×4 хайп · 12 c</div>
     </button>
   </div>
 </div>
@@ -654,14 +685,31 @@ musicBtn.onclick = () => {
 
 <script>
 // ---------- data ----------
+// специализация лаборатории — вкус, экономика общая
 const PRODUCTS = [
-  { em: "🧠", name: "Foundation-модель", price: 4900, units: ["Enterprise-лицензия", "Доступ к API, год", "Fine-tuning под клиента", "On-premise развёртывание", "Приоритетный инференс"] },
-  { em: "☁️", name: "GPU-облако", price: 12000, units: ["Кластер H200, месяц", "Аренда 64×GPU", "Резерв мощностей на квартал", "Выделенный кластер", "Спот-инстансы оптом"] },
-  { em: "🤖", name: "AI-агенты для корпораций", price: 2500, units: ["Внедрение под ключ", "Пилотный проект", "Лицензия на отдел", "Интеграция с CRM", "Агент-консьерж для офиса"] },
-  { em: "🛡", name: "AI-кибербезопасность", price: 8000, units: ["Годовой контракт", "Аудит безопасности", "SOC-мониторинг, месяц", "Пентест нейросетью", "Расширение лицензии"] },
-  { em: "🚗", name: "Автономное вождение", price: 990, units: ["Подписка на автопилот", "Апгрейд до FSD", "Подписка для таксопарка", "Месяц беспилота", "Пакет «город + трасса»"] },
-  { em: "🦾", name: "Гуманоидные роботы", price: 35000, units: ["Поставка, 1 юнит", "Робот-грузчик, аренда", "Юнит + сервис-пакет", "Робот для склада", "Гуманоид в лизинг"] },
+  { em: "💬", name: "Чат-ассистент", desc: "миллиарды диалогов" },
+  { em: "🧑‍💻", name: "Кодинг-модель", desc: "пишет код за всех" },
+  { em: "🎬", name: "Видео-генерация", desc: "Голливуд в промпте" },
+  { em: "🧬", name: "Биотех-модель", desc: "лекарства за часы" },
+  { em: "🛡", name: "Оборонный AI", desc: "не спрашивай зачем" },
+  { em: "🤖", name: "AGI-лаборатория", desc: "осталось чуть-чуть" },
 ];
+
+// потоки дохода — показываются столбцами. API самый «текучий».
+const STREAMS = [
+  { id: "plus", name: "Plus", em: "👤", price: 20,   w: 55,  col: "#a1a1aa", unit: "Подписка Plus" },
+  { id: "pro",  name: "Pro",  em: "⭐", price: 200,  w: 22,  col: "#059669", unit: "Подписка Pro" },
+  { id: "ent",  name: "Enterprise", em: "🏢", price: 2900, w: 5, col: "#f59e0b", unit: "Enterprise-контракт" },
+  { id: "api",  name: "API",  em: "🔌", price: 140,  w: 120, col: "#6366f1", unit: "API-токены" },
+];
+const STREAM_W = STREAMS.reduce((s, x) => s + x.w, 0);
+function pickStream() {
+  let r = Math.random() * STREAM_W;
+  for (const s of STREAMS) { if ((r -= s.w) < 0) return s; }
+  return STREAMS[0];
+}
+const BASE_INTERVAL = 1500; // мс между продажами на старте
+const MODEL_CODE = ["Борщ", "Спутник", "Матрёшка", "Тайга", "Квас", "Балалайка", "Гусь", "Чебурашка", "Валенок", "Самовар"];
 // генератор нарочито специализированных AI-названий
 const KILLERS = ["ChatGPT", "Claude", "Gemini", "Midjourney", "Copilot", "DeepSeek", "Grok"];
 const PROF = ["стоматологов","риелторов","нотариусов","сантехников","тамады","ЖКХ","шиномонтажа","таксистов","свах","батюшек","военкомата","ломбардов","грузчиков","репетиторов","ритуальных услуг","шаурмичных"];
@@ -693,6 +741,11 @@ const EVENTS = [
   { em: "💸", txt: "API подорожал в 4 раза. Опять", mult: 0.55 },
   { em: "🇪🇺", txt: "EU AI Act: регулятор запросил «пару документов»", mult: 0.5 },
   { em: "😴", txt: "Нейросеть ушла на дообучение без предупреждения", mult: 0.45 },
+  { em: "🏆", txt: "Ваша модель №1 на LMArena — все ринулись за API", mult: 3 },
+  { em: "📈", txt: "Бенчмарк MMLU побит — Enterprise выстроились в очередь", mult: 2.5 },
+  { em: "🔌", txt: "API-лимиты сняты, разработчики жгут токены", mult: 2 },
+  { em: "🧊", txt: "Дата-центр ушёл в throttling из-за жары", mult: 0.5 },
+  { em: "🐛", txt: "В новой модели нашли jailbreak — экстренный откат", mult: 0.45 },
 ];
 
 // ---------- state ----------
@@ -700,10 +753,10 @@ let product = null, company = "";
 let balance = 0, shownBalance = 0, sales = 0;
 let speedLvl = 1, priceLvl = 1;
 let speedCost = 100, priceCost = 250;
-let baseInterval = 3800, priceMult = 1;
-// честный баланс: интервал растёт с чеком, базовый $/мин у всех сопоставим
-function productInterval(p) { return 1400 * Math.pow(p.price / 1000, 0.85); }
-let history = []; // [time, amount]
+let baseInterval = BASE_INTERVAL, priceMult = 1; // priceMult = множитель модели
+let hypeMult = 1, hypeUntil = 0, hypeReadyAt = 0; // DevDay
+let modelCode = MODEL_CODE[0];
+let history = []; // [time, amount, streamId]
 let milestoneIdx = 0;
 let eventMult = 1, lastEvent = -1;
 let ipoMult = 1, ipoTarget = 0, ipoShown = false, startTime = 0;
@@ -715,9 +768,7 @@ const productsEl = document.getElementById("products");
 PRODUCTS.forEach((p, i) => {
   const d = document.createElement("div");
   d.className = "product";
-  const cad = productInterval(p) / 1000;
-  const cadTxt = cad < 2 ? "часто, помалу" : "раз в ~" + Math.round(cad) + " c";
-  d.innerHTML = `<div class="em">${p.em}</div><div class="nm">${p.name}</div><div class="pr">~$${p.price.toLocaleString("en-US")} · ${cadTxt}</div>`;
+  d.innerHTML = `<div class="em">${p.em}</div><div class="nm">${p.name}</div><div class="pr">${p.desc}</div>`;
   d.onclick = () => {
     document.querySelectorAll(".product").forEach(x => x.classList.remove("sel"));
     d.classList.add("sel");
@@ -750,12 +801,13 @@ function startRun() {
   document.getElementById("setup").classList.add("hidden");
   document.getElementById("dash").classList.remove("hidden");
   document.getElementById("bEm").textContent = product.em;
-  document.getElementById("bName").textContent = company + (ipoMult > 1 ? " · ×" + ipoMult : "");
+  updateBrand();
+  buildStreams();
   sfxBtn.style.display = "block";
   musicBtn.style.display = "block";
   resetBtn.style.display = "block";
-  baseInterval = productInterval(product);
-  ipoTarget = 25000000 * ipoMult; // фиксированная цель — у всех продуктов равные шансы
+  baseInterval = BASE_INTERVAL;
+  ipoTarget = 25000000 * ipoMult;
   updateUpgrades();
   scheduleSale(1200);
   scheduleEvent();
@@ -764,16 +816,30 @@ function startRun() {
 }
 
 launchBtn.onclick = () => {
-  // цены апгрейдов масштабируются под чек продукта
-  speedCost = Math.round(product.price * 4);
-  priceCost = Math.round(product.price * 10);
+  speedCost = 1200;   // GPU
+  priceCost = 8000;   // релиз модели
   startTime = Date.now();
   rivalName = genName();
-  rivalBal = product.price * 150;
+  rivalBal = 50000 * ipoMult;
   initAudio();
   startMusic();
   startRun();
 };
+
+function updateBrand() {
+  document.getElementById("bName").textContent =
+    company + " · " + modelCode + " v" + priceLvl + (ipoMult > 1 ? " · ×" + ipoMult : "");
+}
+
+function buildStreams() {
+  document.getElementById("streams").innerHTML = STREAMS.map(s =>
+    `<div class="scol" data-id="${s.id}" style="--scol:${s.col || 'rgba(5,150,105,.5)'}">
+       <div class="s-em">${s.em}</div>
+       <div class="s-name">${s.name}</div>
+       <div class="s-rpm" id="srpm-${s.id}">$0</div>
+       <div class="s-bar" id="sbar-${s.id}" style="background:${s.col}"></div>
+     </div>`).join("");
+}
 
 // ---------- engine ----------
 function rnd(n) { return Math.floor(Math.random() * n); }
@@ -785,8 +851,9 @@ function scheduleSale(delay) {
   setTimeout(() => { sale(); scheduleSale(currentInterval()); }, delay);
 }
 function currentInterval() {
-  const base = baseInterval * Math.pow(0.8, speedLvl - 1) / eventMult;
-  return Math.max(120, base * (0.6 + Math.random() * 0.8));
+  if (Date.now() > hypeUntil) hypeMult = 1;
+  const base = baseInterval * Math.pow(0.82, speedLvl - 1) / eventMult / hypeMult;
+  return Math.max(60, base * (0.6 + Math.random() * 0.8));
 }
 
 // ---------- events ----------
@@ -834,20 +901,23 @@ function fireEvent() {
 }
 
 function sale() {
-  let amt = product.price * priceMult * ipoMult * (0.85 + Math.random() * 0.5);
-  const corp = Math.random() < 1 / 80 ? CORP[rnd(CORP.length)] : null; // джекпот ×50
+  const stream = pickStream();
+  let amt = stream.price * priceMult * ipoMult * (0.85 + Math.random() * 0.5);
+  // джекпот ×50 — только в платных потоках (не в Plus)
+  const corp = (stream.id !== "plus" && Math.random() < 1 / 90) ? CORP[rnd(CORP.length)] : null;
   if (corp) amt *= 50;
   balance += amt;
   sales++;
-  history.push([Date.now(), amt]);
-  addPayment(amt, corp);
+  history.push([Date.now(), amt, stream.id]);
+  addPayment(amt, corp, stream);
   floatMoney(amt, corp);
+  pulseStream(stream.id);
   if (corp) {
     sndJackpot();
     confetti();
     shakeScreen();
     jackpotBoostUntil = Date.now() + 8000;
-    showToast("💰 " + corp + ": корпоративный заказ ×50!");
+    showToast("💰 " + corp + ": " + stream.name + "-контракт ×50!");
   } else {
     sndCoin(amt);
   }
@@ -857,7 +927,7 @@ function sale() {
   updateUpgrades();
 }
 
-function addPayment(amt, corp) {
+function addPayment(amt, corp, stream) {
   const feed = document.getElementById("feed");
   const name = corp || FIRST[rnd(FIRST.length)];
   const city = CITIES[rnd(CITIES.length)];
@@ -867,11 +937,17 @@ function addPayment(amt, corp) {
     <div class="avatar" style="background:${corp ? "#f59e0b" : AV_COLORS[rnd(AV_COLORS.length)]}">${corp ? "🏛" : name[0]}</div>
     <div class="info">
       <div class="who">${name}${corp ? "" : " · " + city}</div>
-      <div class="what">${corp ? "Корпоративный заказ ×50" : product.units[rnd(product.units.length)]} — ${company}</div>
+      <div class="what">${stream.em} ${corp ? stream.name + "-контракт ×50" : stream.unit} — ${company}</div>
     </div>
     <div class="amt">+${fmt(amt)}</div>`;
   feed.prepend(el);
   while (feed.children.length > 12) feed.lastChild.remove();
+}
+
+function pulseStream(id) {
+  const el = document.querySelector('.scol[data-id="' + id + '"]');
+  if (!el) return;
+  el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit");
 }
 
 function floatMoney(amt, corp) {
@@ -912,16 +988,31 @@ function tick(ts) {
   const rpm = history.reduce((s, h) => s + h[1], 0);
   document.getElementById("rpm").textContent = fmt(rpm);
 
+  // $/мин по потокам + высота столбцов относительно максимума
+  const per = {}; let maxV = 1;
+  STREAMS.forEach(s => per[s.id] = 0);
+  history.forEach(h => { if (per[h[2]] !== undefined) per[h[2]] += h[1]; });
+  STREAMS.forEach(s => { if (per[s.id] > maxV) maxV = per[s.id]; });
+  STREAMS.forEach(s => {
+    const r = document.getElementById("srpm-" + s.id);
+    const b = document.getElementById("sbar-" + s.id);
+    if (r) r.textContent = fmt(per[s.id]) + "/м";
+    if (b) b.style.transform = "scaleX(" + (per[s.id] / maxV).toFixed(3) + ")";
+  });
+
   // конкурент зарабатывает ~90% твоего темпа, но никогда не спит
   const dt = lastTick ? Math.min(2, (ts - lastTick) / 1000) : 0;
   lastTick = ts;
-  rivalBal += Math.max(rpm / 60 * 0.9, product.price * 0.12) * dt;
+  rivalBal += Math.max(rpm / 60 * 0.9, 80) * dt;
   document.getElementById("rival").innerHTML =
     `🤖 <b>${rivalName}</b>: ${fmt(rivalBal)} · ` +
     (balance >= rivalBal ? '<span class="ahead">вы впереди</span>' : '<span class="behind">вы позади</span>');
 
   document.getElementById("ipoBar").style.width = Math.min(100, balance / ipoTarget * 100) + "%";
   document.getElementById("ipoLabel").textContent = "🔔 IPO при " + fmt(ipoTarget);
+
+  // раз в секунду освежаем кнопки (кулдаун DevDay, доступность апгрейдов)
+  if (!tick._s || ts - tick._s > 950) { tick._s = ts; updateUpgrades(); }
   requestAnimationFrame(tick);
 }
 
@@ -1071,7 +1162,7 @@ function saveState() {
   localStorage.setItem("mm", JSON.stringify({
     run: true, pi: PRODUCTS.indexOf(product), company,
     balance, sales, speedLvl, priceLvl, speedCost, priceCost, priceMult,
-    ipoMult, milestoneIdx, rivalName, rivalBal, startTime
+    ipoMult, milestoneIdx, rivalName, rivalBal, startTime, modelCode
   }));
 }
 resetBtn.onclick = () => {
@@ -1082,26 +1173,35 @@ resetBtn.onclick = () => {
 };
 
 // ---------- upgrades ----------
-const upgSpeed = document.getElementById("upgSpeed");
-const upgPrice = document.getElementById("upgPrice");
+const upgSpeed = document.getElementById("upgSpeed"); // GPU
+const upgPrice = document.getElementById("upgPrice"); // релиз модели
+const upgHype  = document.getElementById("upgHype");  // DevDay
 
-upgSpeed.onclick = () => buy("speed");
-upgPrice.onclick = () => buy("price");
+upgSpeed.onclick = () => buy("gpu");
+upgPrice.onclick = () => buy("model");
+upgHype.onclick  = () => buy("hype");
 
 function buy(kind) {
-  if (kind === "speed" && balance >= speedCost) {
+  if (kind === "gpu" && balance >= speedCost) {
     balance -= speedCost;
     speedLvl++;
     speedCost = Math.round(speedCost * 2.3);
-    flash(upgSpeed);
-    sndUpgrade();
-  } else if (kind === "price" && balance >= priceCost) {
+    flash(upgSpeed); sndUpgrade();
+  } else if (kind === "model" && balance >= priceCost) {
     balance -= priceCost;
     priceLvl++;
-    priceMult *= 1.6;
-    priceCost = Math.round(priceCost * 2.5);
-    flash(upgPrice);
-    sndUpgrade();
+    priceMult *= 1.55;
+    priceCost = Math.round(priceCost * 2.6);
+    modelCode = MODEL_CODE[Math.min(priceLvl - 1, MODEL_CODE.length - 1)];
+    updateBrand();
+    flash(upgPrice); sndUpgrade();
+    showToast("🧠 Релиз модели «" + modelCode + " v" + priceLvl + "» — чеки выросли!");
+  } else if (kind === "hype" && Date.now() >= hypeReadyAt) {
+    hypeMult = 4;
+    hypeUntil = Date.now() + 12000;
+    hypeReadyAt = Date.now() + 60000;
+    flash(upgHype); sndEventGood(); confetti();
+    showToast("🎤 DevDay! Хайп ×4 на 12 секунд");
   }
   updateUpgrades();
 }
@@ -1113,14 +1213,20 @@ function flash(el) {
 }
 
 function updateUpgrades() {
-  upgSpeed.querySelector(".u-lvl").textContent = "LVL " + speedLvl;
-  upgSpeed.querySelector(".u-cost").textContent = "Купить за " + fmt(speedCost);
+  upgSpeed.querySelector(".u-lvl").textContent = "×" + speedLvl;
+  upgSpeed.querySelector(".u-cost").textContent = fmt(speedCost);
   upgSpeed.disabled = balance < speedCost;
   upgSpeed.classList.toggle("ready", balance >= speedCost);
-  upgPrice.querySelector(".u-lvl").textContent = "LVL " + priceLvl;
-  upgPrice.querySelector(".u-cost").textContent = "Купить за " + fmt(priceCost);
+
+  upgPrice.querySelector(".u-lvl").textContent = "v" + priceLvl;
+  upgPrice.querySelector(".u-cost").textContent = fmt(priceCost);
   upgPrice.disabled = balance < priceCost;
   upgPrice.classList.toggle("ready", balance >= priceCost);
+
+  const cd = Math.max(0, Math.ceil((hypeReadyAt - Date.now()) / 1000));
+  upgHype.querySelector(".u-cost").textContent = cd > 0 ? "⏳ " + cd + " c" : "Бесплатно";
+  upgHype.classList.toggle("cooldown", cd > 0);
+  upgHype.classList.toggle("ready", cd === 0);
 }
 
 // ---------- milestones ----------
@@ -1170,6 +1276,7 @@ if (sv) {
     priceMult = sv.priceMult; milestoneIdx = sv.milestoneIdx;
     rivalName = sv.rivalName; rivalBal = sv.rivalBal;
     startTime = sv.startTime;
+    modelCode = sv.modelCode || MODEL_CODE[Math.min(priceLvl - 1, MODEL_CODE.length - 1)];
     // аудио по политике браузера стартует после первого клика
     document.addEventListener("pointerdown", () => { initAudio(); startMusic(); }, { once: true });
     startRun();
