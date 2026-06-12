@@ -209,9 +209,9 @@
     font-size: 15px; font-weight: 600; color: #fff; flex-shrink: 0;
   }
   .pay .info { flex: 1; min-width: 0; }
-  .pay .who { font-size: 14px; font-weight: 600; }
+  .pay .who { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pay .what { font-size: 12px; color: var(--text2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pay .amt { font-size: 16px; font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; }
+  .pay .amt { font-size: 16px; font-weight: 700; color: var(--green); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
   /* upgrades */
   .upgrades {
@@ -219,21 +219,21 @@
     padding-bottom: max(20px, env(safe-area-inset-bottom));
   }
   .upg {
-    flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 12px 12px; text-align: left; cursor: pointer; min-width: 0;
-    box-shadow: var(--shadow); font-family: inherit;
+    flex: 1 1 0; background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 12px; text-align: left; cursor: pointer; min-width: 0; min-height: 80px;
+    box-shadow: var(--shadow); font-family: inherit; overflow: hidden;
     transition: transform .2s cubic-bezier(.32,.72,0,1), opacity .2s, background .15s;
   }
   .upg:hover:not(:disabled) { background: #f4f4f5; }
   .upg:active { transform: scale(.95); }
   .upg:disabled { opacity: .45; pointer-events: none; }
   .upg .u-top { display: flex; justify-content: space-between; align-items: center; }
-  .upg .u-name { font-size: 13px; font-weight: 600; white-space: nowrap; }
-  .upg .u-cost { white-space: nowrap; }
+  .upg .u-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .upg .u-cost { display: block; white-space: nowrap; }
   .upg.cooldown { opacity: .5; pointer-events: none; }
   .upg .u-lvl { font-size: 11px; font-weight: 600; color: var(--text); background: #f4f4f5; border: 1px solid var(--border); padding: 2px 8px; border-radius: 9999px; }
   .upg .u-cost { font-size: 13px; color: var(--text2); margin-top: 6px; font-variant-numeric: tabular-nums; }
-  .upg .u-eff { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 2px; }
+  .upg .u-eff { display: block; font-size: 11px; color: var(--green); font-weight: 600; margin-top: 2px; }
   .upg.ready { border-color: #6ee7b7; animation: readyPulse 1.8s ease-in-out infinite; }
   .upg.ready .u-cost { color: var(--green); font-weight: 600; }
   @keyframes readyPulse {
@@ -326,6 +326,12 @@
   .share-btn:hover { background: #f4f4f5; }
   .share-btn:active { transform: scale(.96); }
   .share-btn svg { flex-shrink: 0; }
+  #multBadge { display: none; color: var(--green); font-weight: 600; }
+  #ipoBtn { margin-top: 14px; }
+  #sfxBtn { display: none; right: 16px; }
+  #musicBtn { display: none; right: 62px; }
+  #resetBtn { display: none; right: auto; left: 16px; font-size: 15px; }
+  #langBtn { left: auto; right: 108px; font-size: 12px; font-weight: 700; }
 
   /* зал славы */
   .lb { margin-top: 26px; width: 100%; display: none; }
@@ -382,6 +388,56 @@
     55% { transform: translate(-4px, 2px) rotate(-.3deg); }
     75% { transform: translate(3px, -1px); }
   }
+
+  /* шапка — ширина как у карточек, имя влезает */
+  .brand { max-width: 420px; margin: 0 auto; padding: 0 8px; justify-content: center; }
+  #bName { overflow: hidden; text-overflow: ellipsis; }
+
+  /* кнопка языка: на старте по центру, в игре — в ряд с иконками справа */
+  #langBtn { left: 50%; right: auto; transform: translateX(-50%); }
+  #langBtn.ingame { left: auto; right: 108px; transform: none; }
+
+  /* ===== МОБИЛКА: уменьшаем общий масштаб ===== */
+  @media (max-width: 600px) {
+    .mute { width: 34px; height: 34px; font-size: 15px; border-radius: 9px; }
+    #sfxBtn { right: 14px !important; } #musicBtn { right: 56px !important; } #langBtn { font-size: 11px; } #resetBtn { left: 14px !important; }
+
+    #dash { padding-top: max(68px, calc(env(safe-area-inset-top) + 58px)); }
+    .brand { font-size: 14px; }
+    #langBtn.ingame { right: 98px !important; }
+    .balance-wrap { margin-top: 2.5vh; }
+    .balance-label { font-size: 12px; }
+    #balance { font-size: clamp(40px, 13vw, 58px); }
+    .ipo-prog { margin-top: 10px; }
+    .statcards { margin-top: 12px; }
+    .sc { padding: 10px 12px; }
+    .sc-main { font-size: 17px; }
+    #event { margin-top: 12px; padding: 9px 11px; }
+    #event .e-txt { font-size: 12px; }
+    .feed { margin-top: 10px; }
+    .pay { padding: 9px 12px; margin-bottom: 6px; }
+    .pay .avatar { width: 32px; height: 32px; font-size: 13px; }
+    .pay .who { font-size: 13px; }
+    .pay .what { font-size: 11px; }
+    .pay .amt { font-size: 14px; }
+    .upg { padding: 10px 8px; min-height: 82px; }
+    .upg .u-top { flex-direction: column-reverse; align-items: flex-start; justify-content: flex-end; gap: 4px; min-width: 0; }
+    .upg .u-name { font-size: 12px; max-width: 100%; }
+    .upg .u-lvl { font-size: 10px; padding: 1px 6px; }
+    .upg .u-cost { font-size: 12px; }
+    .upg .u-eff { font-size: 10px; line-height: 1.2; }
+    .scol .s-name { font-size: 9px; }
+
+    /* старт: прокручиваемый и компактный, заголовок ниже иконок */
+    #setup { justify-content: flex-start; overflow-y: auto; padding: 60px 20px 36px; }
+    .setup-title { font-size: 27px; }
+    .setup-sub { font-size: 14px; }
+    .products { margin-top: 20px; gap: 8px; }
+    .product { padding: 14px 6px 12px; }
+    .product .em { font-size: 28px; }
+    .name-row { margin-top: 18px; }
+    .launch { margin-top: 18px; }
+  }
 </style>
 </head>
 <body>
@@ -390,13 +446,13 @@
 <div class="screen" id="setup">
   <div class="setup-title" id="stTitle">Become the next OpenAI</div>
   <div class="setup-sub" id="stSub">The AGI race is on. Everyone's torching billions on GPUs — now it's your turn. Pick your angle.</div>
-  <div class="setup-sub" id="multBadge" style="display:none; color: var(--green); font-weight: 600"></div>
+  <div class="setup-sub" id="multBadge"></div>
   <div class="products" id="products"></div>
   <div class="name-row">
-    <input id="nameInput" placeholder="Company name" maxlength="36" autocomplete="off">
-    <button class="dice" id="dice" title="Generate">🎲</button>
+    <input id="nameInput" type="text" placeholder="Company name" maxlength="36" autocomplete="off">
+    <button class="dice" id="dice" type="button" title="Generate">🎲</button>
   </div>
-  <button class="launch" id="launch" disabled>Launch 🚀</button>
+  <button class="launch" id="launch" type="button" disabled>Launch 🚀</button>
   <div class="lb" id="lb">
     <div class="lb-title" id="lbTitleEl">🏆 Hall of Fame — fastest IPOs</div>
     <div id="lbRows"></div>
@@ -433,20 +489,20 @@
   </div>
   <div class="feed" id="feed"></div>
   <div class="upgrades">
-    <button class="upg" id="upgSpeed">
-      <div class="u-top"><span class="u-name">🎛 GPUs</span><span class="u-lvl">×1</span></div>
-      <div class="u-cost"></div>
-      <div class="u-eff">+22% users</div>
+    <button class="upg" id="upgSpeed" type="button">
+      <span class="u-top"><span class="u-name">🎛 GPUs</span><span class="u-lvl">×1</span></span>
+      <span class="u-cost"></span>
+      <span class="u-eff">+22% users</span>
     </button>
-    <button class="upg" id="upgPrice">
-      <div class="u-top"><span class="u-name">🧠 Release</span><span class="u-lvl">v1</span></div>
-      <div class="u-cost"></div>
-      <div class="u-eff">+55% per check</div>
+    <button class="upg" id="upgPrice" type="button">
+      <span class="u-top"><span class="u-name">🧠 Release</span><span class="u-lvl">v1</span></span>
+      <span class="u-cost"></span>
+      <span class="u-eff">+55% per check</span>
     </button>
-    <button class="upg" id="upgHype">
-      <div class="u-top"><span class="u-name">🎤 DevDay</span><span class="u-lvl">⚡</span></div>
-      <div class="u-cost"></div>
-      <div class="u-eff">×4 hype · 12s</div>
+    <button class="upg" id="upgHype" type="button">
+      <span class="u-top"><span class="u-name">🎤 DevDay</span><span class="u-lvl">⚡</span></span>
+      <span class="u-cost"></span>
+      <span class="u-eff">×4 hype · 12s</span>
     </button>
   </div>
 </div>
@@ -454,19 +510,19 @@
 <div id="ipo">
   <div class="ipo-card">
     <div class="big">🔔</div>
-    <h2 id="ipoTitle"></h2>
+    <h2 id="ipoTitle">IPO!</h2>
     <p id="ipoStats"></p>
-    <img id="memePrev" alt="Shareable meme">
+    <img id="memePrev" alt="Shareable meme" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==">
     <div class="share-row" id="shareRow"></div>
-    <button class="launch" id="ipoBtn" style="margin-top: 14px"></button>
+    <button class="launch" id="ipoBtn" type="button">Restart</button>
   </div>
 </div>
 
 <div id="toast"></div>
-<button class="mute" id="sfxBtn" title="Sound effects" style="display:none; right: 16px">🔊</button>
-<button class="mute" id="musicBtn" title="Music" style="display:none; right: 62px">🎵</button>
-<button class="mute" id="resetBtn" title="Delete progress" style="display:none; right: auto; left: 16px; font-size: 15px">🗑</button>
-<button class="mute" id="langBtn" title="Language" style="left: auto; right: 108px; font-size: 12px; font-weight: 700">RU</button>
+<button class="mute" id="sfxBtn" type="button" title="Sound effects" aria-label="Sound effects">🔊</button>
+<button class="mute" id="musicBtn" type="button" title="Music" aria-label="Music">🎵</button>
+<button class="mute" id="resetBtn" type="button" title="Delete progress" aria-label="Delete progress">🗑</button>
+<button class="mute" id="langBtn" type="button" title="Language" aria-label="Language">RU</button>
 
 <div class="footer">
   <a href="https://chereshna.net" target="_blank" rel="noopener">chereshna.net</a>
@@ -1319,10 +1375,10 @@ function renderShareUI() {
 
   const row = document.getElementById("shareRow");
   row.innerHTML = `
-    <a class="share-btn" href="https://t.me/share/url?url=${enc(appUrl)}&text=${enc(text)}" target="_blank" rel="noopener">${ICONS.tg}</a>
-    <a class="share-btn" href="https://x.com/intent/post?text=${enc(text)}&url=${enc(appUrl)}" target="_blank" rel="noopener">${ICONS.x}</a>
-    <a class="share-btn" href="https://wa.me/?text=${enc(text + " " + appUrl)}" target="_blank" rel="noopener">${ICONS.wa}</a>
-    <button class="share-btn" id="dlMeme" title="${tr("Download image", "Скачать картинку")}">${ICONS.dl}</button>`;
+    <a class="share-btn" href="https://t.me/share/url?url=${enc(appUrl)}&text=${enc(text)}" target="_blank" rel="noopener" aria-label="Telegram">${ICONS.tg}</a>
+    <a class="share-btn" href="https://x.com/intent/post?text=${enc(text)}&url=${enc(appUrl)}" target="_blank" rel="noopener" aria-label="X">${ICONS.x}</a>
+    <a class="share-btn" href="https://wa.me/?text=${enc(text + " " + appUrl)}" target="_blank" rel="noopener" aria-label="WhatsApp">${ICONS.wa}</a>
+    <button class="share-btn" id="dlMeme" type="button" title="${tr("Download image", "Скачать картинку")}" aria-label="${tr("Download image", "Скачать картинку")}">${ICONS.dl}</button>`;
 
   document.getElementById("dlMeme").onclick = async () => {
     if (!memeBlob) return;
